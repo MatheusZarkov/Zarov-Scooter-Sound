@@ -1,18 +1,39 @@
 {
- "sampleRate": 48000,
+ "sampleRate": 32000,
  "camadas": [
   1100,
-  2350,
-  4950,
-  10400
+  1234,
+  1385,
+  1554,
+  1743,
+  1956,
+  2195,
+  2463,
+  2763,
+  3100,
+  3479,
+  3903,
+  4379,
+  4914,
+  5513,
+  6186,
+  6941,
+  7787,
+  8738,
+  9804,
+  11000
  ],
- "ganho": 21.296051933749904,
+ "ganho": 21.58997005043777,
  "loops": [
   {
    "rpm": 1100,
-   "trecho": "carga_baixa",
-   "centro_s": 7.4,
-   "ciclos": 6,
+   "trecho": "carga",
+   "centro_s": 7.75,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1151,
+    1185
+   ],
    "banco": "carga",
    "arquivo": "hayabusa_1100_carga.wav"
   },
@@ -20,57 +41,493 @@
    "rpm": 1100,
    "trecho": "lenta",
    "centro_s": 5.62,
-   "ciclos": 6,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1092,
+    1106
+   ],
    "banco": "solto",
    "arquivo": "hayabusa_1100_solto.wav"
   },
   {
-   "rpm": 2350,
+   "rpm": 1234,
    "trecho": "carga",
-   "centro_s": 13.38,
-   "ciclos": 12,
+   "centro_s": 8.65,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1232,
+    1302
+   ],
    "banco": "carga",
-   "arquivo": "hayabusa_2350_carga.wav"
+   "arquivo": "hayabusa_1234_carga.wav"
   },
   {
-   "rpm": 2350,
+   "rpm": 1234,
    "trecho": "solto",
-   "centro_s": 61.9,
-   "ciclos": 12,
+   "centro_s": 71.95,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1287,
+    1315
+   ],
    "banco": "solto",
-   "arquivo": "hayabusa_2350_solto.wav"
+   "arquivo": "hayabusa_1234_solto.wav"
   },
   {
-   "rpm": 4950,
+   "rpm": 1385,
    "trecho": "carga",
-   "centro_s": 24.15,
+   "centro_s": 9.32,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1254,
+    1399
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_1385_carga.wav"
+  },
+  {
+   "rpm": 1385,
+   "trecho": "solto",
+   "centro_s": 70.28,
+   "ciclos": 4,
+   "rpm_gravado": [
+    1368,
+    1396
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_1385_solto.wav"
+  },
+  {
+   "rpm": 1554,
+   "trecho": "carga",
+   "centro_s": 10.45,
+   "ciclos": 5,
+   "rpm_gravado": [
+    1430,
+    1632
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_1554_carga.wav"
+  },
+  {
+   "rpm": 1554,
+   "trecho": "solto",
+   "centro_s": 67.85,
+   "ciclos": 5,
+   "rpm_gravado": [
+    1535,
+    1564
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_1554_solto.wav"
+  },
+  {
+   "rpm": 1743,
+   "trecho": "carga",
+   "centro_s": 11.17,
+   "ciclos": 5,
+   "rpm_gravado": [
+    1697,
+    1811
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_1743_carga.wav"
+  },
+  {
+   "rpm": 1743,
+   "trecho": "solto",
+   "centro_s": 66.1,
+   "ciclos": 5,
+   "rpm_gravado": [
+    1718,
+    1764
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_1743_solto.wav"
+  },
+  {
+   "rpm": 1956,
+   "trecho": "carga",
+   "centro_s": 11.7,
+   "ciclos": 6,
+   "rpm_gravado": [
+    1832,
+    2091
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_1956_carga.wav"
+  },
+  {
+   "rpm": 1956,
+   "trecho": "solto",
+   "centro_s": 64.4,
+   "ciclos": 6,
+   "rpm_gravado": [
+    1850,
+    1977
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_1956_solto.wav"
+  },
+  {
+   "rpm": 2195,
+   "trecho": "carga",
+   "centro_s": 12.75,
+   "ciclos": 6,
+   "rpm_gravado": [
+    2165,
+    2257
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_2195_carga.wav"
+  },
+  {
+   "rpm": 2195,
+   "trecho": "solto",
+   "centro_s": 62.7,
+   "ciclos": 6,
+   "rpm_gravado": [
+    2160,
+    2231
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_2195_solto.wav"
+  },
+  {
+   "rpm": 2463,
+   "trecho": "carga",
+   "centro_s": 13.67,
+   "ciclos": 7,
+   "rpm_gravado": [
+    2387,
+    2527
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_2463_carga.wav"
+  },
+  {
+   "rpm": 2463,
+   "trecho": "solto",
+   "centro_s": 61.27,
+   "ciclos": 7,
+   "rpm_gravado": [
+    2438,
+    2495
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_2463_solto.wav"
+  },
+  {
+   "rpm": 2763,
+   "trecho": "carga",
+   "centro_s": 14.72,
+   "ciclos": 8,
+   "rpm_gravado": [
+    2702,
+    2829
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_2763_carga.wav"
+  },
+  {
+   "rpm": 2763,
+   "trecho": "solto",
+   "centro_s": 59.8,
+   "ciclos": 8,
+   "rpm_gravado": [
+    2714,
+    2798
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_2763_solto.wav"
+  },
+  {
+   "rpm": 3100,
+   "trecho": "carga",
+   "centro_s": 15.92,
+   "ciclos": 9,
+   "rpm_gravado": [
+    3037,
+    3157
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_3100_carga.wav"
+  },
+  {
+   "rpm": 3100,
+   "trecho": "solto",
+   "centro_s": 58.35,
+   "ciclos": 9,
+   "rpm_gravado": [
+    3048,
+    3131
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_3100_solto.wav"
+  },
+  {
+   "rpm": 3479,
+   "trecho": "carga",
+   "centro_s": 17.32,
+   "ciclos": 10,
+   "rpm_gravado": [
+    3424,
+    3532
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_3479_carga.wav"
+  },
+  {
+   "rpm": 3479,
+   "trecho": "solto",
+   "centro_s": 56.82,
+   "ciclos": 10,
+   "rpm_gravado": [
+    3431,
+    3519
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_3479_solto.wav"
+  },
+  {
+   "rpm": 3903,
+   "trecho": "carga",
+   "centro_s": 19.12,
+   "ciclos": 11,
+   "rpm_gravado": [
+    3862,
+    3934
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_3903_carga.wav"
+  },
+  {
+   "rpm": 3903,
+   "trecho": "solto",
+   "centro_s": 55.38,
+   "ciclos": 11,
+   "rpm_gravado": [
+    3829,
+    3965
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_3903_solto.wav"
+  },
+  {
+   "rpm": 4379,
+   "trecho": "carga",
+   "centro_s": 21.75,
+   "ciclos": 13,
+   "rpm_gravado": [
+    4350,
+    4404
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_4379_carga.wav"
+  },
+  {
+   "rpm": 4379,
+   "trecho": "solto",
+   "centro_s": 53.92,
+   "ciclos": 13,
+   "rpm_gravado": [
+    4313,
+    4438
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_4379_solto.wav"
+  },
+  {
+   "rpm": 4914,
+   "trecho": "carga",
+   "centro_s": 24.05,
+   "ciclos": 14,
+   "rpm_gravado": [
+    4856,
+    4971
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_4914_carga.wav"
+  },
+  {
+   "rpm": 4914,
+   "trecho": "solto",
+   "centro_s": 52.45,
+   "ciclos": 14,
+   "rpm_gravado": [
+    4835,
+    4977
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_4914_solto.wav"
+  },
+  {
+   "rpm": 5513,
+   "trecho": "carga",
+   "centro_s": 25.78,
+   "ciclos": 16,
+   "rpm_gravado": [
+    5452,
+    5598
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_5513_carga.wav"
+  },
+  {
+   "rpm": 5513,
+   "trecho": "solto",
+   "centro_s": 50.95,
+   "ciclos": 16,
+   "rpm_gravado": [
+    5426,
+    5591
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_5513_solto.wav"
+  },
+  {
+   "rpm": 6186,
+   "trecho": "carga",
+   "centro_s": 27.38,
+   "ciclos": 18,
+   "rpm_gravado": [
+    6114,
+    6251
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_6186_carga.wav"
+  },
+  {
+   "rpm": 6186,
+   "trecho": "solto",
+   "centro_s": 49.42,
+   "ciclos": 18,
+   "rpm_gravado": [
+    6101,
+    6282
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_6186_solto.wav"
+  },
+  {
+   "rpm": 6941,
+   "trecho": "carga",
+   "centro_s": 29.0,
+   "ciclos": 20,
+   "rpm_gravado": [
+    6863,
+    7011
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_6941_carga.wav"
+  },
+  {
+   "rpm": 6941,
+   "trecho": "solto",
+   "centro_s": 47.92,
+   "ciclos": 20,
+   "rpm_gravado": [
+    6836,
+    6997
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_6941_solto.wav"
+  },
+  {
+   "rpm": 7787,
+   "trecho": "carga",
+   "centro_s": 30.98,
+   "ciclos": 23,
+   "rpm_gravado": [
+    7719,
+    7903
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_7787_carga.wav"
+  },
+  {
+   "rpm": 7787,
+   "trecho": "solto",
+   "centro_s": 46.47,
+   "ciclos": 23,
+   "rpm_gravado": [
+    7665,
+    7911
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_7787_solto.wav"
+  },
+  {
+   "rpm": 8738,
+   "trecho": "carga",
+   "centro_s": 32.95,
    "ciclos": 25,
+   "rpm_gravado": [
+    8664,
+    8848
+   ],
    "banco": "carga",
-   "arquivo": "hayabusa_4950_carga.wav"
+   "arquivo": "hayabusa_8738_carga.wav"
   },
   {
-   "rpm": 4950,
+   "rpm": 8738,
    "trecho": "solto",
-   "centro_s": 52.35,
+   "centro_s": 44.95,
    "ciclos": 25,
+   "rpm_gravado": [
+    8629,
+    8900
+   ],
    "banco": "solto",
-   "arquivo": "hayabusa_4950_solto.wav"
+   "arquivo": "hayabusa_8738_solto.wav"
   },
   {
-   "rpm": 10400,
+   "rpm": 9804,
    "trecho": "carga",
-   "centro_s": 36.27,
-   "ciclos": 52,
+   "centro_s": 35.17,
+   "ciclos": 29,
+   "rpm_gravado": [
+    9719,
+    9835
+   ],
    "banco": "carga",
-   "arquivo": "hayabusa_10400_carga.wav"
+   "arquivo": "hayabusa_9804_carga.wav"
   },
   {
-   "rpm": 10400,
+   "rpm": 9804,
    "trecho": "solto",
-   "centro_s": 42.65,
-   "ciclos": 52,
+   "centro_s": 43.5,
+   "ciclos": 29,
+   "rpm_gravado": [
+    9733,
+    9987
+   ],
    "banco": "solto",
-   "arquivo": "hayabusa_10400_solto.wav"
+   "arquivo": "hayabusa_9804_solto.wav"
+  },
+  {
+   "rpm": 11000,
+   "trecho": "carga",
+   "centro_s": 37.4,
+   "ciclos": 32,
+   "rpm_gravado": [
+    10868,
+    11107
+   ],
+   "banco": "carga",
+   "arquivo": "hayabusa_11000_carga.wav"
+  },
+  {
+   "rpm": 11000,
+   "trecho": "solto",
+   "centro_s": 42.1,
+   "ciclos": 32,
+   "rpm_gravado": [
+    10798,
+    11100
+   ],
+   "banco": "solto",
+   "arquivo": "hayabusa_11000_solto.wav"
   }
  ]
 }

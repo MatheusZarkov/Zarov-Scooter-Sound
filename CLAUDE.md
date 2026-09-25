@@ -18,9 +18,9 @@ de mudar.
 - `gravacoes/hayabusa_sem_marcha.wav`: varredura da Suzuki Hayabusa gravada do
   Engine Simulator (wrightbagwell.com/engine-sim). Marcha lenta, subida até o corte
   (11.340 rpm) e descida solta.
-- `amostras/hayabusa/`: os 8 loops (4 giros x carga/solto) extraídos dessa gravação,
-  PCM 16 bits mono 48 kHz. Estão embutidos em base64 no simulador. Candidatos
-  diretos para o firmware.
+- `amostras/hayabusa/`: 42 loops (21 giros de 1100 a 11000 rpm, carga e solto)
+  extraídos dessa gravação, PCM 16 bits mono 32 kHz, 1,1 MB no total. Estão
+  embutidos em base64 no simulador. Candidatos diretos para o firmware.
 - `ferramentas/extrair_camadas.py`: rastreia o rpm pela frequência de explosão e
   corta os loops em giro constante com número inteiro de ciclos.
 
@@ -81,9 +81,13 @@ Laço de física em passo fixo, 100 a 120 Hz.
 
 ## Lógica de áudio
 
-- 4 camadas de loop gravadas em rpm fixo, cada uma tocada a `rpm / rpm_gravado`.
+- Camadas de loop gravadas em rpm fixo, cada uma tocada a `rpm / rpm_gravado`.
   Crossfade entre as duas camadas vizinhas com ganho em raiz quadrada
   (`sqrt(1-t)` e `sqrt(t)`), nunca linear.
+- Com amostra gravada, 4 camadas não bastam: acelerar a amostra desloca as
+  ressonâncias do escapamento e o som fica fino (o usuário ouviu isso na Hayabusa).
+  Camadas a cada 12% de giro deixam o timbre a menos de 1 dB da variação natural
+  da própria gravação. O sintetizado continua com 4.
 - Dois bancos por camada, "puxando" e "solto", com crossfade pela posição do punho.
   É o timbre de carga e o som de freio motor.
 - Camadas de taxa FIXA (vento, pneu, chiado) acompanham só volume, nunca pitch.
