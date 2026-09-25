@@ -23,6 +23,15 @@ de mudar.
   embutidos em base64 no simulador. Candidatos diretos para o firmware.
 - `ferramentas/extrair_camadas.py`: rastreia o rpm pela frequência de explosão e
   corta os loops em giro constante com número inteiro de ciclos.
+- `ferramentas/motor-fisico/`: "Hayabusa física" do simulador. Usa o código do
+  engine-sim (MIT) para gás, combustão, válvulas e sintetizador, com o virabrequim
+  imposto pelo rpm do banco (sem resolvedor de corpo rígido). Como gerar o pacote
+  está no topo de `entrada.ts`. Cuidado: no port, `getRodJournalPositionGlobal`
+  ignora a rotação do virabrequim; `somCinematico.ts` corrige isso.
+  Custo medido num núcleo x86 (bun): 20 kHz/8 subpassos = 516 ms por segundo de
+  som, 10 kHz/4 = 168 ms, 6 kHz/2 = 74 ms. Não cabe no ESP32 sem port para C com
+  float e muita otimização, e mesmo assim só na qualidade baixa, que piora o som
+  solto. Comparado à gravação, o timbre fica a 5,2 dB (amostras: 4,0 dB; piso 3,1).
 
 ## Hardware atual (versão 1, bancada e primeira instalação)
 
