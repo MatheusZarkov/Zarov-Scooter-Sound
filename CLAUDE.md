@@ -15,6 +15,14 @@ de mudar.
   comportamento para o firmware. Leia o `<script>` antes de começar.
 - `esquematico-som-scooter.html`: esquemático da versão alimentada pelo pack.
   ATENÇÃO: está parcialmente desatualizado, ver "Hardware atual" abaixo.
+- `gravacoes/hayabusa_sem_marcha.wav`: varredura da Suzuki Hayabusa gravada do
+  Engine Simulator (wrightbagwell.com/engine-sim). Marcha lenta, subida até o corte
+  (11.340 rpm) e descida solta.
+- `amostras/hayabusa/`: os 8 loops (4 giros x carga/solto) extraídos dessa gravação,
+  PCM 16 bits mono 48 kHz. Estão embutidos em base64 no simulador. Candidatos
+  diretos para o firmware.
+- `ferramentas/extrair_camadas.py`: rastreia o rpm pela frequência de explosão e
+  corta os loops em giro constante com número inteiro de ciclos.
 
 ## Hardware atual (versão 1, bancada e primeira instalação)
 

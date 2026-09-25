@@ -1,0 +1,76 @@
+{
+ "sampleRate": 48000,
+ "camadas": [
+  1100,
+  2350,
+  4950,
+  10400
+ ],
+ "ganho": 21.296051933749904,
+ "loops": [
+  {
+   "rpm": 1100,
+   "trecho": "carga_baixa",
+   "centro_s": 7.4,
+   "ciclos": 6,
+   "banco": "carga",
+   "arquivo": "hayabusa_1100_carga.wav"
+  },
+  {
+   "rpm": 1100,
+   "trecho": "lenta",
+   "centro_s": 5.62,
+   "ciclos": 6,
+   "banco": "solto",
+   "arquivo": "hayabusa_1100_solto.wav"
+  },
+  {
+   "rpm": 2350,
+   "trecho": "carga",
+   "centro_s": 13.38,
+   "ciclos": 12,
+   "banco": "carga",
+   "arquivo": "hayabusa_2350_carga.wav"
+  },
+  {
+   "rpm": 2350,
+   "trecho": "solto",
+   "centro_s": 61.9,
+   "ciclos": 12,
+   "banco": "solto",
+   "arquivo": "hayabusa_2350_solto.wav"
+  },
+  {
+   "rpm": 4950,
+   "trecho": "carga",
+   "centro_s": 24.15,
+   "ciclos": 25,
+   "banco": "carga",
+   "arquivo": "hayabusa_4950_carga.wav"
+  },
+  {
+   "rpm": 4950,
+   "trecho": "solto",
+   "centro_s": 52.35,
+   "ciclos": 25,
+   "banco": "solto",
+   "arquivo": "hayabusa_4950_solto.wav"
+  },
+  {
+   "rpm": 10400,
+   "trecho": "carga",
+   "centro_s": 36.27,
+   "ciclos": 52,
+   "banco": "carga",
+   "arquivo": "hayabusa_10400_carga.wav"
+  },
+  {
+   "rpm": 10400,
+   "trecho": "solto",
+   "centro_s": 42.65,
+   "ciclos": 52,
+   "banco": "solto",
+   "arquivo": "hayabusa_10400_solto.wav"
+  }
+ ]
+}
