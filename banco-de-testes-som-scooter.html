@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Banco de testes: som de motor para scooter elétrica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --enamel:#EDE9DF;
+  --enamel-2:#E0DBCE;
+  --ink:#23261F;
+  --ink-dim:#5E6356;
+  --rule:#C5BFB0;
+  --amber:#B4741A;
+  --cyan:#1E7C7A;
+  --hot:#B33A28;
+  --scope-bg:#DCD7C8;
+  --pad:#D6D0BF;
+  --pad-fill:#B4741A;
+  --shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 1px 3px rgba(35,38,31,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --enamel:#22261F;
+    --enamel-2:#2C312A;
+    --ink:#E8E6DC;
+    --ink-dim:#95A08D;
+    --rule:#3D443A;
+    --amber:#E8A33D;
+    --cyan:#79CFC9;
+    --hot:#E2634A;
+    --scope-bg:#171A15;
+    --pad:#2C312A;
+    --pad-fill:#E8A33D;
+    --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 2px 6px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --enamel:#22261F; --enamel-2:#2C312A; --ink:#E8E6DC; --ink-dim:#95A08D;
+  --rule:#3D443A; --amber:#E8A33D; --cyan:#79CFC9; --hot:#E2634A;
+  --scope-bg:#171A15; --pad:#2C312A; --pad-fill:#E8A33D;
+  --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 2px 6px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--enamel);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-size:15px; line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 56px}
+
+h1{
+  font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0 0 2px;
+}
+.sub{color:var(--ink-dim);font-size:13.5px;margin:0 0 18px;max-width:58ch}
+
+/* ---- gate ---- */
+#gate{
+  border:1px solid var(--rule);border-radius:3px;background:var(--enamel-2);
+  padding:18px;margin-bottom:18px;box-shadow:var(--shadow);
+}
+#gate p{margin:0 0 12px;font-size:14px;color:var(--ink-dim)}
+button.primary{
+  font-family:inherit;font-size:15px;font-weight:600;
+  background:var(--hot);color:#fff;border:0;border-radius:3px;
+  padding:13px 20px;cursor:pointer;width:100%;
+}
+button.primary:active{transform:translateY(1px)}
+button.primary:focus-visible,.sw:focus-visible,#pad:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* ---- instrument ---- */
+.rig{display:none}
+.rig.on{display:block}
+
+.readout{
+  display:grid;grid-template-columns:1fr auto;align-items:end;
+  border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:0;
+}
+.rpm{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:58px;font-weight:500;line-height:.9;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;color:var(--hot);
+}
+.rpm small{font-size:15px;font-weight:400;color:var(--ink-dim);letter-spacing:0;margin-left:6px}
+.side{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-dim);line-height:1.45}
+.side b{color:var(--ink);font-weight:600}
+
+canvas{
+  display:block;width:100%;height:132px;background:var(--scope-bg);
+  border:1px solid var(--rule);border-top:0;border-radius:0 0 3px 3px;
+}
+.key{
+  display:flex;gap:14px;flex-wrap:wrap;font-size:12px;
+  font-family:"IBM Plex Mono",monospace;color:var(--ink-dim);margin:7px 0 18px;
+}
+.key i{display:inline-block;width:13px;height:3px;vertical-align:middle;margin-right:5px}
+
+/* ---- throttle ---- */
+#pad{
+  position:relative;height:148px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--pad);overflow:hidden;touch-action:none;cursor:grab;
+  user-select:none;-webkit-user-select:none;box-shadow:var(--shadow);
+}
+#pad:active{cursor:grabbing}
+#fill{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--pad-fill);opacity:.85}
+#padlab{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:13.5px;color:var(--ink);mix-blend-mode:difference;filter:invert(1) grayscale(1) contrast(3);
+  pointer-events:none;text-align:center;padding:0 20px;
+}
+.hint{font-size:12.5px;color:var(--ink-dim);margin:7px 0 20px}
+
+/* ---- switches ---- */
+.bank{border-top:1px solid var(--rule);padding-top:14px}
+.bank h2{font-size:14px;font-weight:600;margin:0 0 3px}
+.bank p.note{font-size:12.5px;color:var(--ink-dim);margin:0 0 12px;max-width:56ch}
+.sw{
+  display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;
+  width:100%;text-align:left;background:none;border:0;padding:9px 0;
+  font-family:inherit;color:inherit;cursor:pointer;border-bottom:1px solid var(--rule);
+}
+.led{
+  width:44px;height:22px;border-radius:2px;border:1px solid var(--rule);
+  background:var(--enamel-2);position:relative;margin-top:2px;
+}
+.led::after{
+  content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:1px;
+  background:var(--ink-dim);transition:transform .12s ease,background .12s ease;
+}
+.sw[aria-pressed="true"] .led::after{transform:translateX(22px);background:var(--hot)}
+.sw .t{font-size:14.5px;font-weight:500;line-height:1.3}
+.sw .d{font-size:12.5px;color:var(--ink-dim);line-height:1.35;margin-top:2px}
+.sw .v{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--hot);margin-top:3px}
+
+.slider{padding:11px 0;border-bottom:1px solid var(--rule)}
+.slider label{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+.slider label span{font-family:"IBM Plex Mono",monospace;color:var(--ink-dim)}
+input[type=range]{width:100%;accent-color:var(--hot);height:26px}
+.slider .d{font-size:12.5px;color:var(--ink-dim);margin-top:2px}
+
+footer{margin-top:26px;font-size:12.5px;color:var(--ink-dim);line-height:1.55}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Banco de testes: som de motor para scooter</h1>
+<p class="sub">Motor sintetizado no navegador, física da scooter rodando junto. Cada chave abaixo liga ou desliga uma das decisões de projeto, para você ouvir o que cada uma custa.</p>
+
+<div id="gate">
+  <p>O áudio só começa depois de um toque. Use fone ou aumente o volume, boa parte do som é grave.</p>
+  <button class="primary" id="start">Ligar o banco</button>
+</div>
+
+<div class="rig" id="rig">
+
+  <div class="readout">
+    <div class="rpm"><span id="rpmv">0</span><small>rpm</small></div>
+    <div class="side">
+      <div><b id="kmh">0</b> km/h</div>
+      <div><b id="src">punho</b> mandando</div>
+      <div id="gearline">marcha <b id="gear">1</b></div>
+    </div>
+  </div>
+  <canvas id="scope"></canvas>
+  <div class="key">
+    <span><i style="background:var(--amber)"></i>punho filtrado</span>
+    <span><i style="background:var(--cyan)"></i>roda</span>
+    <span><i style="background:var(--hot);height:4px"></i>rpm final</span>
+  </div>
+
+  <div id="pad" tabindex="0" role="slider" aria-label="Acelerador" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="fill"></div>
+    <div id="padlab">Segure e deslize para cima para acelerar</div>
+  </div>
+  <p class="hint">Solta e o punho volta sozinho ao neutro, como o de verdade. No computador dá para segurar a barra de espaço.</p>
+
+  <div class="bank">
+    <h2>As decisões</h2>
+    <p class="note">Desligue uma de cada vez e acelere de novo. A diferença fica óbvia no ouvido antes de ficar no gráfico.</p>
+
+    <button class="sw" id="sw-layers" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Quatro camadas com crossfade</span>
+      <span class="d">Desligado, uma amostra só muda de velocidade. É o efeito esquilo: as ressonâncias do escapamento sobem de tom junto com o giro, o que não acontece em motor nenhum.</span>
+      <span class="v" id="v-layers">4 camadas ativas</span></span>
+    </button>
+
+    <button class="sw" id="sw-floor" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Piso da roda</span>
+      <span class="d">rpm = max(roda, punho). Desligado, o som obedece só o punho: você solta a 40 km/h e o motor cai para marcha lenta enquanto a scooter ainda corre.</span>
+      <span class="v" id="v-floor">max(roda, punho)</span></span>
+    </button>
+
+    <button class="sw" id="sw-load" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Timbre de carga</span>
+      <span class="d">Dois bancos de amostra, puxando e solto, com crossfade pelo punho. É o som de freio motor. Desligado, o giro muda mas o caráter não.</span>
+      <span class="v" id="v-load">carga 0%</span></span>
+    </button>
+
+    <button class="sw" id="sw-pop" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Estouro no escapamento</span>
+      <span class="d">Dispara quando o punho cai rápido com o giro alto. Trava de um segundo para não virar metralhadora.</span></span>
+    </button>
+
+    <button class="sw" id="sw-gears" aria-pressed="false">
+      <span class="led"></span>
+      <span><span class="t">Marchas virtuais</span>
+      <span class="d">Quatro relações com queda de giro na troca. Ligado, ela soa como moto. Desligado, como motor elétrico de relação única.</span></span>
+    </button>
+
+    <button class="sw" id="sw-regen" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Freio regenerativo</span>
+      <span class="d">Muda só a física, não o áudio. Serve para conferir que o piso da roda acerta tanto na desaceleração forte quanto na roda livre.</span></span>
+    </button>
+
+    <button class="sw" id="sw-wind" aria-pressed="true">
+      <span class="led"></span>
+      <span><span class="t">Camada de taxa fixa</span>
+      <span class="d">Vento e pneu, ligados à velocidade e não ao giro. É a camada que nunca deve mudar de tom, o mesmo princípio da batida de ignição do diesel.</span></span>
+    </button>
+
+    <div class="slider">
+      <label for="atk">Subida do punho <span id="v-atk">0.050</span></label>
+      <input type="range" id="atk" min="0.01" max="0.30" step="0.005" value="0.05">
+      <div class="d">Inércia do virabrequim subindo. Alto demais e some o atraso; baixo demais e parece que o motor tem volante de trator.</div>
+    </div>
+
+    <div class="slider">
+      <label for="dec">Descida do punho <span id="v-dec">0.020</span></label>
+      <input type="range" id="dec" min="0.005" max="0.30" step="0.005" value="0.02">
+      <div class="d">Mantenha abaixo da subida. Motor cai de giro mais devagar do que sobe.</div>
+    </div>
+
+    <div class="slider">
+      <label for="vol">Volume <span id="v-vol">60%</span></label>
+      <input type="range" id="vol" min="0" max="100" step="1" value="60">
+    </div>
+  </div>
+
+  <footer>
+    O motor aqui é sintetizado por modos ressonantes, não é amostra gravada. As sete ressonâncias são fixas em frequência de propósito, porque é isso que acontece num escapamento real, e é justamente o que a chave de camadas deixa você ouvir quebrar.
+  </footer>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ---------------------------------------------------------------- estado
+var S = {
+  layers:true, floor:true, load:true, pop:true, gears:false, regen:true, wind:true,
+  atk:0.05, dec:0.02, vol:0.60
+};
+
+var throttle=0, throttleTarget=0, throttlePrev=0;
+var rpmT=900, v=0, rpm=900, rpmWheel=0, gear=0, shiftUntil=0, shiftDip=0;
+var lastPop=0;
+var RPM_IDLE=900, RPM_MAX=9000, V_MAX=11.6; // m/s ~ 42 km/h
+var GEARS=[1550,1000,720,560];  // rpm por m/s
+var SINGLE=760;                  // relacao unica
+
+// ---------------------------------------------------------------- audio
+var ctx=null, master=null, bus=null, tone=null, windGain=null, ready=false;
+var LSPEC=[
+  {rpm:1200, bright:0.22, decay:0.95, noise:0.55},
+  {rpm:2600, bright:0.42, decay:0.72, noise:0.46},
+  {rpm:4600, bright:0.68, decay:0.52, noise:0.36},
+  {rpm:7000, bright:1.00, decay:0.38, noise:0.30}
+];
+var MODES=[72,143,219,331,528,842,1330];
+var nodes=[]; // {load:{src,g}, coast:{src,g}}
+
+function makeLoop(spec, coast){
+  var sr=ctx.sampleRate;
+  var fire=spec.rpm/60;                 // twin 4 tempos: uma explosao por volta
+  var period=1/fire;
+  var pairs=Math.max(2, Math.round(0.20*fire));
+  var cycles=pairs*2;
+  var len=Math.round(cycles*period*sr);
+  var buf=ctx.createBuffer(1,len,sr);
+  var d=buf.getChannelData(0);
+  var bright = coast ? spec.bright*0.45 : spec.bright;
+  var noiseAmt = coast ? spec.noise*0.40 : spec.noise;
+  var i,n,m;
+
+  for(i=0;i<cycles;i++){
+    // intervalo desigual, cara de V-twin
+    var t0=i*period + (i%2 ? -0.13*period : 0);
+    var start=Math.round(((t0%(cycles*period))+cycles*period)%(cycles*period)*sr);
+
+    var nLen=Math.round(0.022*sr);
+    var tauN=0.0035+0.005*spec.decay;
+    for(n=0;n<nLen;n++){
+      d[(start+n)%len]+= noiseAmt*(Math.random()*2-1)*Math.exp(-(n/sr)/tauN);
+    }
+    for(m=0;m<MODES.length;m++){
+      var f=MODES[m], hi=m/(MODES.length-1);
+      var a=(1-hi*0.72)*(0.34+bright*hi*1.7);
+      var tau=(0.05+0.09*spec.decay)*(1-hi*0.7)+0.004;
+      var ml=Math.min(len*2, Math.round(Math.min(tau*5,0.26)*sr));
+      var ph=Math.random()*6.2831853;
+      for(n=0;n<ml;n++){
+        var t=n/sr;
+        d[(start+n)%len]+= a*Math.sin(6.2831853*f*t+ph)*Math.exp(-t/tau);
+      }
+    }
+  }
+  var pk=0; for(i=0;i<len;i++){ var ab=d[i]<0?-d[i]:d[i]; if(ab>pk) pk=ab; }
+  var g=(coast?0.55:0.88)/(pk||1);
+  for(i=0;i<len;i++) d[i]*=g;
+  return buf;
+}
+
+function noiseBuffer(sec){
+  var sr=ctx.sampleRate, len=Math.round(sec*sr);
+  var b=ctx.createBuffer(1,len,sr), d=b.getChannelData(0);
+  var last=0;
+  for(var i=0;i<len;i++){ var w=Math.random()*2-1; last=0.96*last+0.04*w; d[i]=last*3.2; }
+  return b;
+}
+
+function boot(){
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain(); master.gain.value=S.vol;
+
+  var shape=ctx.createWaveShaper();
+  var cur=new Float32Array(1024);
+  for(var i=0;i<1024;i++){ var x=i/511.5-1; cur[i]=Math.tanh(x*1.7)/Math.tanh(1.7); }
+  shape.curve=cur; shape.oversample="2x";
+
+  tone=ctx.createBiquadFilter(); tone.type="lowpass"; tone.frequency.value=1200; tone.Q.value=0.6;
+  bus=ctx.createGain(); bus.gain.value=0.9;
+  bus.connect(tone); tone.connect(shape); shape.connect(master); master.connect(ctx.destination);
+
+  for(var L=0;L<LSPEC.length;L++){
+    var pair={};
+    ["load","coast"].forEach(function(kind){
+      var src=ctx.createBufferSource();
+      src.buffer=makeLoop(LSPEC[L], kind==="coast");
+      src.loop=true;
+      var g=ctx.createGain(); g.gain.value=0;
+      src.connect(g); g.connect(bus); src.start();
+      pair[kind]={src:src,g:g};
+    });
+    nodes.push(pair);
+  }
+
+  // camada de taxa fixa: vento e pneu
+  var wsrc=ctx.createBufferSource(); wsrc.buffer=noiseBuffer(2.2); wsrc.loop=true;
+  var wf=ctx.createBiquadFilter(); wf.type="bandpass"; wf.frequency.value=780; wf.Q.value=0.45;
+  windGain=ctx.createGain(); windGain.gain.value=0;
+  wsrc.connect(wf); wf.connect(windGain); windGain.connect(master); wsrc.start();
+
+  ready=true;
+}
+
+function bang(){
+  if(!ready) return;
+  var now=ctx.currentTime;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuffer(0.28);
+  var bp=ctx.createBiquadFilter(); bp.type="bandpass";
+  bp.frequency.value=180+Math.random()*160; bp.Q.value=1.1;
+  var g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001,now);
+  g.gain.exponentialRampToValueAtTime(1.5,now+0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001,now+0.20);
+  src.connect(bp); bp.connect(g); g.connect(master);
+  src.start(now); src.stop(now+0.3);
+}
+
+function mix(){
+  if(!ready) return;
+  var now=ctx.currentTime, i;
+  var loadAmt = S.load ? throttle : 1.0;
+
+  function set(p,rate,gain){
+    p.src.playbackRate.setTargetAtTime(Math.max(0.05,rate), now, 0.025);
+    p.g.gain.setTargetAtTime(gain, now, 0.03);
+  }
+
+  if(!S.layers){
+    // uma amostra so, esticada. o efeito esquilo aparece aqui.
+    var r=rpm/LSPEC[0].rpm;
+    set(nodes[0].load,  r, 0.95*loadAmt);
+    set(nodes[0].coast, r, 0.95*(1-loadAmt));
+    for(i=1;i<4;i++){ set(nodes[i].load,1,0); set(nodes[i].coast,1,0); }
+  } else {
+    var w=[0,0,0,0];
+    if(rpm<=LSPEC[0].rpm){ w[0]=1; }
+    else if(rpm>=LSPEC[3].rpm){ w[3]=1; }
+    else {
+      for(i=0;i<3;i++){
+        if(rpm>=LSPEC[i].rpm && rpm<=LSPEC[i+1].rpm){
+          var t=(rpm-LSPEC[i].rpm)/(LSPEC[i+1].rpm-LSPEC[i].rpm);
+          w[i]=Math.sqrt(1-t); w[i+1]=Math.sqrt(t);
+          break;
+        }
+      }
+    }
+    for(i=0;i<4;i++){
+      var rate=rpm/LSPEC[i].rpm;
+      set(nodes[i].load,  rate, w[i]*loadAmt);
+      set(nodes[i].coast, rate, w[i]*(1-loadAmt));
+    }
+  }
+
+  var cut=420 + loadAmt*3600 + rpm*0.33;
+  tone.frequency.setTargetAtTime(Math.min(cut,12000), now, 0.05);
+  windGain.gain.setTargetAtTime(S.wind ? Math.pow(v/V_MAX,1.6)*0.16 : 0, now, 0.12);
+  master.gain.setTargetAtTime(S.vol, now, 0.05);
+}
+
+// ---------------------------------------------------------------- fisica
+function step(dt){
+  // punho volta sozinho ao neutro
+  throttle += (throttleTarget-throttle)*Math.min(1, dt*22);
+  if(throttle<0.004) throttle=0;
+
+  // scooter
+  var drive = throttle*3.4*(1 - v/V_MAX);
+  var drag  = 0.0045*v*v + 0.14;
+  var brake = (S.regen && throttle<0.05) ? 0.95 : 0;
+  v = Math.max(0, v + (drive - drag - brake)*dt);
+
+  // rpm da roda
+  if(S.gears){
+    var g0=gear;
+    var r=v*GEARS[gear];
+    if(r>7600 && gear<3){ gear++; shiftDip=1; }
+    else if(r<2300 && gear>0){ gear--; }
+    if(gear!==g0) shiftUntil=performance.now()+220;
+    rpmWheel = v*GEARS[gear];
+  } else {
+    gear=0;
+    rpmWheel = v*SINGLE;
+  }
+  shiftDip *= Math.pow(0.02, dt);
+  rpmWheel = Math.max(RPM_IDLE, rpmWheel*(1-0.28*shiftDip));
+
+  // punho filtrado, assimetrico
+  var alvo = RPM_IDLE + throttle*(RPM_MAX-RPM_IDLE);
+  var k = (alvo>rpmT) ? S.atk : S.dec;
+  rpmT += (alvo-rpmT) * Math.min(1, k*dt*100);
+
+  // o piso
+  rpm = S.floor ? Math.max(rpmWheel, rpmT) : rpmT;
+  rpm = Math.max(RPM_IDLE, Math.min(RPM_MAX, rpm));
+
+  // estouro
+  var d = (throttle-throttlePrev)/dt;
+  var now=performance.now();
+  if(S.pop && d<-3.0 && rpm>5000 && now-lastPop>1000){ bang(); lastPop=now; }
+  throttlePrev=throttle;
+}
+
+// ---------------------------------------------------------------- scope
+var cv=document.getElementById("scope"), cx=cv.getContext("2d");
+var hist=[], HMAX=260;
+function fitCanvas(){
+  var r=cv.getBoundingClientRect(), dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  cx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener("resize",fitCanvas);
+
+function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function draw(){
+  var r=cv.getBoundingClientRect(), W=r.width, H=r.height;
+  cx.clearRect(0,0,W,H);
+  cx.fillStyle=css("--scope-bg"); cx.fillRect(0,0,W,H);
+
+  cx.strokeStyle=css("--rule"); cx.lineWidth=1;
+  for(var k=1;k<5;k++){
+    var y=H - (k*2000/RPM_MAX)*H;
+    cx.beginPath(); cx.moveTo(0,y+.5); cx.lineTo(W,y+.5); cx.stroke();
+  }
+
+  if(hist.length<2){ return; }
+  function line(key,color,width){
+    cx.strokeStyle=color; cx.lineWidth=width; cx.lineJoin="round"; cx.beginPath();
+    for(var i=0;i<hist.length;i++){
+      var x=(i/(HMAX-1))*W;
+      var y=H - (hist[i][key]/RPM_MAX)*H;
+      if(i===0) cx.moveTo(x,y); else cx.lineTo(x,y);
+    }
+    cx.stroke();
+  }
+  line("t",css("--amber"),1.6);
+  line("w",css("--cyan"),1.6);
+  line("f",css("--hot"),2.8);
+}
+
+// ---------------------------------------------------------------- loop
+var last=performance.now(), acc=0, uiAcc=0;
+function frame(now){
+  var dt=Math.min(0.05,(now-last)/1000); last=now;
+  acc+=dt;
+  while(acc>=1/120){ step(1/120); acc-=1/120; }
+
+  hist.push({t:rpmT,w:rpmWheel,f:rpm});
+  if(hist.length>HMAX) hist.shift();
+
+  mix(); draw();
+
+  uiAcc+=dt;
+  if(uiAcc>0.08){
+    uiAcc=0;
+    document.getElementById("rpmv").textContent=Math.round(rpm);
+    document.getElementById("kmh").textContent=(v*3.6).toFixed(1);
+    document.getElementById("src").textContent=(S.floor && rpmWheel>rpmT)?"roda":"punho";
+    document.getElementById("gear").textContent=S.gears?(gear+1):"única";
+    document.getElementById("v-load").textContent="carga "+Math.round((S.load?throttle:1)*100)+"%";
+    document.getElementById("fill").style.height=(throttle*100)+"%";
+    document.getElementById("pad").setAttribute("aria-valuenow",Math.round(throttle*100));
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---------------------------------------------------------------- controles
+var pad=document.getElementById("pad"), dragging=false;
+function fromEvent(e){
+  var r=pad.getBoundingClientRect();
+  var y=(e.clientY!==undefined)?e.clientY:0;
+  var frac=(r.bottom-y)/r.height;
+  throttleTarget=Math.max(0,Math.min(1,frac));
+}
+pad.addEventListener("pointerdown",function(e){
+  dragging=true; pad.setPointerCapture(e.pointerId); fromEvent(e); e.preventDefault();
+});
+pad.addEventListener("pointermove",function(e){ if(dragging) fromEvent(e); });
+function release(){ dragging=false; throttleTarget=0; }
+pad.addEventListener("pointerup",release);
+pad.addEventListener("pointercancel",release);
+pad.addEventListener("lostpointercapture",release);
+
+window.addEventListener("keydown",function(e){
+  if(e.code==="Space"&&!e.repeat){ throttleTarget=1; e.preventDefault(); }
+});
+window.addEventListener("keyup",function(e){
+  if(e.code==="Space"){ throttleTarget=0; e.preventDefault(); }
+});
+
+function bindSwitch(id,key,after){
+  var el=document.getElementById(id);
+  el.addEventListener("click",function(){
+    S[key]=!S[key];
+    el.setAttribute("aria-pressed",String(S[key]));
+    if(after) after();
+  });
+}
+bindSwitch("sw-layers","layers",function(){
+  document.getElementById("v-layers").textContent = S.layers?"4 camadas ativas":"1 amostra esticada";
+});
+bindSwitch("sw-floor","floor",function(){
+  document.getElementById("v-floor").textContent = S.floor?"max(roda, punho)":"só o punho";
+});
+bindSwitch("sw-load","load");
+bindSwitch("sw-pop","pop");
+bindSwitch("sw-gears","gears");
+bindSwitch("sw-regen","regen");
+bindSwitch("sw-wind","wind");
+
+function bindSlider(id,key,fmt){
+  var el=document.getElementById(id), out=document.getElementById("v-"+id);
+  el.addEventListener("input",function(){ S[key]=parseFloat(el.value); out.textContent=fmt(S[key]); });
+  out.textContent=fmt(S[key]);
+}
+bindSlider("atk","atk",function(x){return x.toFixed(3);});
+bindSlider("dec","dec",function(x){return x.toFixed(3);});
+bindSlider("vol","vol",function(x){return Math.round(x*100)+"%";});
+document.getElementById("vol").value=S.vol*100;
+document.getElementById("vol").addEventListener("input",function(e){
+  S.vol=parseFloat(e.target.value)/100;
+  document.getElementById("v-vol").textContent=Math.round(S.vol*100)+"%";
+});
+document.getElementById("v-vol").textContent="60%";
+
+document.getElementById("start").addEventListener("click",function(){
+  var b=document.getElementById("start");
+  b.disabled=true; b.textContent="Gerando as amostras...";
+  setTimeout(function(){
+    try{ boot(); }catch(err){
+      b.disabled=false; b.textContent="Não deu. Toque para tentar de novo.";
+      return;
+    }
+    document.getElementById("gate").style.display="none";
+    document.getElementById("rig").classList.add("on");
+    fitCanvas();
+    requestAnimationFrame(frame);
+  },30);
+});
+
+})();
+</script>
+</body>
+</html>

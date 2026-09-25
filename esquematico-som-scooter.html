@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Esquemático: módulo de som de motor para scooter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#E9ECE6; --paper:#F6F7F4; --ink:#1C2733; --wire:#1C2733; --dim:#5A6672;
+  --frame:#9AA5AE; --frame-t:#4A5A68; --box:#EDEFEA; --net:#9B2F22; --rule:#C9CFC8;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171C; --paper:#1A2128; --ink:#DCE3E8; --wire:#DCE3E8; --dim:#8E9BA6;
+    --frame:#4A5864; --frame-t:#A3B1BC; --box:#222B33; --net:#F08A74; --rule:#2E3943;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171C; --paper:#1A2128; --ink:#DCE3E8; --wire:#DCE3E8; --dim:#8E9BA6;
+  --frame:#4A5864; --frame-t:#A3B1BC; --box:#222B33; --net:#F08A74; --rule:#2E3943;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:1240px;margin:0 auto;padding:18px 16px 56px}
+.text{max-width:640px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+.lead{color:var(--dim);margin:0 0 14px;font-size:14px}
+.bar{display:flex;gap:10px;align-items:center;margin:0 0 8px;flex-wrap:wrap}
+.bar button{font:500 13.5px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background:var(--paper);
+  border:1px solid var(--rule);border-radius:3px;padding:8px 14px;cursor:pointer}
+.bar button:focus-visible{outline:2px solid var(--net);outline-offset:2px}
+.bar span{font-size:12.5px;color:var(--dim)}
+.sheet{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--paper);-webkit-overflow-scrolling:touch}
+.sheet svg{display:block;width:1200px;height:auto;max-width:none}
+.sheet.fit svg{width:100%}
+h2{font-size:16px;font-weight:600;margin:30px 0 8px}
+p{margin:0 0 12px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th,td{text-align:left;padding:7px 10px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--dim)}
+td.r{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;white-space:nowrap}
+.fix{border-left:3px solid var(--net);padding:2px 0 2px 14px;margin:0 0 14px}
+.fix b{font-weight:600}
+.paper{fill:var(--paper)}
+.border{fill:none;stroke:var(--ink);stroke-width:1.4}
+.fr{fill:none;stroke:var(--frame);stroke-width:1;stroke-dasharray:6 5}
+.ft{font:600 13px "IBM Plex Sans",system-ui,sans-serif;fill:var(--frame-t)}
+.sub{font:500 12.5px "IBM Plex Sans",system-ui,sans-serif;fill:var(--ink)}
+.w{fill:none;stroke:var(--wire);stroke-width:1.7;stroke-linejoin:round}
+.s{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.f{fill:var(--wire)}
+.box{fill:var(--box);stroke:var(--ink);stroke-width:1.6}
+.net{fill:var(--paper);stroke:var(--net);stroke-width:1.3}
+.nt{font:500 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--net)}
+.ref{font:600 11.5px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink)}
+.rv{font:400 11px "IBM Plex Mono",ui-monospace,monospace;fill:var(--dim)}
+.pin{font:400 10.5px "IBM Plex Mono",ui-monospace,monospace;fill:var(--ink)}
+.t{font:400 12px "IBM Plex Sans",system-ui,sans-serif;fill:var(--ink)}
+.zone{font:400 10px "IBM Plex Mono",monospace;fill:var(--dim)}
+.tb{font:600 12.5px "IBM Plex Sans",system-ui,sans-serif;fill:var(--ink)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Esquemático do módulo de som</h1>
+<p class="lead">ESP32 lendo punho e hall do motor por sangria, saída I2S para a caixinha ou para um alto-falante próprio.</p>
+
+<div class="bar">
+  <button id="fit" aria-pressed="false">Ajustar à tela</button>
+  <span id="hint">Arraste para os lados, ou use pinça para ampliar.</span>
+</div>
+<div class="sheet" id="sheet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" role="img" aria-label="Esquemático do módulo de som de motor com ESP32">
+<rect class="paper" x="0" y="0" width="1200" height="820"/>
+<rect class="border" x="12" y="12" width="1176" height="796"/>
+<text class="zone" x="110" y="26" text-anchor="middle">1</text>
+<text class="zone" x="306" y="26" text-anchor="middle">2</text>
+<text class="zone" x="502" y="26" text-anchor="middle">3</text>
+<text class="zone" x="698" y="26" text-anchor="middle">4</text>
+<text class="zone" x="894" y="26" text-anchor="middle">5</text>
+<text class="zone" x="1090" y="26" text-anchor="middle">6</text>
+<text class="zone" x="22" y="111.5" text-anchor="middle">A</text>
+<text class="zone" x="22" y="310.5" text-anchor="middle">B</text>
+<text class="zone" x="22" y="509.5" text-anchor="middle">C</text>
+<text class="zone" x="22" y="708.5" text-anchor="middle">D</text>
+<rect class="fr" x="30" y="40" width="600" height="230"/>
+<text class="ft" x="40" y="59" text-anchor="start">Alimentação</text>
+<rect class="box" x="50" y="100" width="30" height="140"/>
+<circle class="s" cx="80" cy="120" r="3"/>
+<text class="pin" x="55" y="124" text-anchor="start">+</text>
+<circle class="s" cx="80" cy="220" r="3"/>
+<text class="pin" x="55" y="224" text-anchor="start">−</text>
+<text class="ref" x="50" y="93" text-anchor="start">J4</text>
+<text class="rv" x="50" y="255" text-anchor="start">Pack 36V a 48V</text>
+<polyline class="w" points="80,120 110,120"/>
+<rect class="s" x="117" y="113" width="36" height="14"/>
+<polyline class="w" points="110,120 160,120"/>
+<text class="rv" x="135" y="107" text-anchor="middle">F1 1A</text>
+<polyline class="w" points="160,120 190,120"/>
+<circle class="s" cx="193" cy="120" r="3"/>
+<circle class="s" cx="237" cy="120" r="3"/>
+<line class="s" x1="195" y1="118" x2="234" y2="105"/>
+<text class="rv" x="215" y="98" text-anchor="middle">SW1 chave DC</text>
+<polyline class="w" points="240,120 400,120"/>
+<circle class="f" cx="280" cy="120" r="3.2"/>
+<circle class="f" cx="330" cy="120" r="3.2"/>
+<polyline class="w" points="280,120 280,166"/>
+<polyline class="w" points="280,174 280,220"/>
+<line class="s" x1="268" y1="166" x2="292" y2="166"/>
+<path class="s" d="M268 177 Q280 171 292 177"/>
+<text class="rv" x="295" y="161" text-anchor="start">+</text>
+<text class="ref" x="264" y="168" text-anchor="end">C1</text>
+<text class="rv" x="264" y="182" text-anchor="end">470µF 100V</text>
+<polyline class="w" points="330,120 330,166"/>
+<polyline class="w" points="330,174 330,220"/>
+<line class="s" x1="318" y1="166" x2="342" y2="166"/>
+<line class="s" x1="318" y1="174" x2="342" y2="174"/>
+<text class="ref" x="344" y="168" text-anchor="start">C2</text>
+<text class="rv" x="344" y="182" text-anchor="start">100nF 100V</text>
+<polyline class="w" points="80,220 400,220"/>
+<circle class="f" cx="280" cy="220" r="3.2"/>
+<circle class="f" cx="330" cy="220" r="3.2"/>
+<rect class="box" x="430" y="100" width="120" height="140"/>
+<polyline class="w" points="400,120 430,120"/>
+<polyline class="w" points="400,220 430,220"/>
+<text class="pin" x="436" y="124" text-anchor="start">IN+</text>
+<text class="pin" x="436" y="224" text-anchor="start">IN−</text>
+<text class="pin" x="544" y="124" text-anchor="end">OUT+</text>
+<text class="pin" x="544" y="224" text-anchor="end">OUT−</text>
+<text class="ref" x="490" y="162" text-anchor="middle">U1</text>
+<text class="rv" x="490" y="178" text-anchor="middle">XL7015 buck</text>
+<text class="rv" x="490" y="192" text-anchor="middle">entrada 5 a 80V</text>
+<text class="rv" x="490" y="206" text-anchor="middle">ajuste 5,0V</text>
+<polyline class="w" points="550,120 575,120"/>
+<polygon class="net" points="575,120 582,112 612.7,112 612.7,128 582,128"/>
+<text class="nt" x="597.35" y="124" text-anchor="middle">+5V</text>
+<polyline class="w" points="550,220 590,220"/>
+<path class="s" d="M590 220 v10 M578 230 h24 M583 234 h14 M587 238 h6"/>
+<text class="rv" x="606" y="238" text-anchor="start">estrela</text>
+<rect class="fr" x="650" y="40" width="140" height="230"/>
+<text class="ft" x="660" y="59" text-anchor="start">Leitura</text>
+<polygon class="net" points="690,90 697,82 727.7,82 727.7,98 697,98"/>
+<text class="nt" x="712.35" y="94" text-anchor="middle">+5V</text>
+<text class="rv" x="662" y="118" text-anchor="start">Rótulos iguais</text>
+<text class="rv" x="662" y="131" text-anchor="start">são o mesmo fio.</text>
+<circle class="f" cx="664" cy="158" r="3.2"/>
+<text class="rv" x="676" y="162" text-anchor="start">Ponto = conexão.</text>
+<path class="s" d="M670 182 v10 M658 192 h24 M663 196 h14 M667 200 h6"/>
+<text class="rv" x="690" y="196" text-anchor="start">Terra comum,</text>
+<text class="rv" x="690" y="209" text-anchor="start">volta tudo</text>
+<text class="rv" x="690" y="222" text-anchor="start">à estrela.</text>
+<path class="s" d="M666 244 l8 8 M674 244 l-8 8"/>
+<text class="rv" x="684" y="252" text-anchor="start">Não conectar.</text>
+<rect class="fr" x="30" y="290" width="420" height="420"/>
+<text class="ft" x="40" y="309" text-anchor="start">Entradas, sangria da controladora</text>
+<rect class="box" x="50" y="330" width="30" height="90"/>
+<circle class="s" cx="80" cy="345" r="3"/>
+<text class="pin" x="55" y="349" text-anchor="start">5V</text>
+<circle class="s" cx="80" cy="375" r="3"/>
+<text class="pin" x="55" y="379" text-anchor="start">S</text>
+<circle class="s" cx="80" cy="405" r="3"/>
+<text class="pin" x="55" y="409" text-anchor="start">G</text>
+<text class="ref" x="50" y="323" text-anchor="start">J1 punho</text>
+<text class="rv" x="50" y="435" text-anchor="start">em paralelo com a</text>
+<text class="rv" x="50" y="449" text-anchor="start">controladora</text>
+<polyline class="w" points="80,345 100,345"/>
+<path class="s" d="M100 341 l8 8 M108 341 l-8 8"/>
+<text class="rv" x="114" y="349" text-anchor="start">não usar</text>
+<polyline class="w" points="80,375 120,375"/>
+<path class="s" d="M120 375 h10 l5 -7 l10 14 l10 -14 l10 14 l5 -7 h10"/>
+<text class="rv" x="150" y="363" text-anchor="middle">R1 10k</text>
+<polyline class="w" points="180,375 490,375"/>
+<circle class="f" cx="220" cy="375" r="3.2"/>
+<circle class="f" cx="280" cy="375" r="3.2"/>
+<polyline class="w" points="220,375 220,390"/>
+<path class="s" d="M220 390 v10 l7 5 l-14 10 l14 10 l-14 10 l7 5 v10"/>
+<text class="ref" x="232" y="417" text-anchor="start">R2</text>
+<text class="rv" x="232" y="431" text-anchor="start">22k</text>
+<polyline class="w" points="220,450 220,470"/>
+<path class="s" d="M220 470 v10 M208 480 h24 M213 484 h14 M217 488 h6"/>
+<polyline class="w" points="280,375 280,418.5"/>
+<polyline class="w" points="280,426.5 280,470"/>
+<line class="s" x1="268" y1="418.5" x2="292" y2="418.5"/>
+<line class="s" x1="268" y1="426.5" x2="292" y2="426.5"/>
+<text class="ref" x="294" y="420.5" text-anchor="start">C3</text>
+<text class="rv" x="294" y="434.5" text-anchor="start">100nF</text>
+<path class="s" d="M280 470 v10 M268 480 h24 M273 484 h14 M277 488 h6"/>
+<polyline class="w" points="80,405 100,405"/>
+<path class="s" d="M100 405 v10 M88 415 h24 M93 419 h14 M97 423 h6"/>
+<text class="rv" x="320" y="368" text-anchor="start">≈ 2,9V no fundo</text>
+<rect class="box" x="50" y="605" width="30" height="60"/>
+<circle class="s" cx="80" cy="620" r="3"/>
+<text class="pin" x="55" y="624" text-anchor="start">S</text>
+<circle class="s" cx="80" cy="650" r="3"/>
+<text class="pin" x="55" y="654" text-anchor="start">G</text>
+<text class="ref" x="50" y="598" text-anchor="start">J2 hall do motor</text>
+<text class="rv" x="50" y="680" text-anchor="start">um dos três fios</text>
+<polyline class="w" points="80,620 130,620"/>
+<polyline class="w" points="130,620 140,620"/>
+<polyline class="w" points="160,620 170,620"/>
+<path class="s" d="M160 612 L160 628 L140 620 Z"/>
+<line class="s" x1="140" y1="612" x2="140" y2="628"/>
+<text class="rv" x="150" y="644" text-anchor="middle">D1 BAT85</text>
+<polyline class="w" points="170,620 490,620"/>
+<circle class="f" cx="230" cy="620" r="3.2"/>
+<polyline class="w" points="230,620 230,600"/>
+<path class="s" d="M230 600 v-10 l7 -5 l-14 -10 l14 -10 l-14 -10 l7 -5 v-10"/>
+<text class="ref" x="242" y="568" text-anchor="start">R3</text>
+<text class="rv" x="242" y="582" text-anchor="start">10k</text>
+<polyline class="w" points="230,550 230,540"/>
+<polygon class="net" points="230,540 248.8,532 248.8,516 211.2,516 211.2,532"/>
+<text class="nt" x="230" y="528" text-anchor="middle">+3V3</text>
+<polyline class="w" points="80,650 100,650"/>
+<path class="s" d="M100 650 v10 M88 660 h24 M93 664 h14 M97 668 h6"/>
+<text class="rv" x="300" y="648" text-anchor="start">hall puxa para baixo,</text>
+<text class="rv" x="300" y="661" text-anchor="start">R3 dá o nível alto.</text>
+<text class="rv" x="300" y="674" text-anchor="start">Nunca passa de 3,3V.</text>
+<rect class="fr" x="460" y="290" width="340" height="420"/>
+<text class="ft" x="470" y="309" text-anchor="start">Controle</text>
+<rect class="box" x="510" y="320" width="180" height="360"/>
+<polyline class="w" points="490,340 510,340"/>
+<text class="pin" x="516" y="344" text-anchor="start">VIN</text>
+<polygon class="net" points="490,340 505.35,332 505.35,316 474.65,316 474.65,332"/>
+<text class="nt" x="490" y="328" text-anchor="middle">+5V</text>
+<polyline class="w" points="490,375 510,375"/>
+<text class="pin" x="516" y="379" text-anchor="start">GPIO34</text>
+<polyline class="w" points="490,620 510,620"/>
+<text class="pin" x="516" y="624" text-anchor="start">GPIO35</text>
+<polyline class="w" points="490,660 510,660"/>
+<text class="pin" x="516" y="664" text-anchor="start">GND</text>
+<polyline class="w" points="490,660 475,660 475,672"/>
+<path class="s" d="M475 672 v10 M463 682 h24 M468 686 h14 M472 690 h6"/>
+<polyline class="w" points="690,340 710,340"/>
+<text class="pin" x="684" y="344" text-anchor="end">3V3</text>
+<polygon class="net" points="710,340 717,332 754.6,332 754.6,348 717,348"/>
+<text class="nt" x="735.8" y="344" text-anchor="middle">+3V3</text>
+<polyline class="w" points="690,420 710,420"/>
+<text class="pin" x="684" y="424" text-anchor="end">GPIO26</text>
+<polygon class="net" points="710,420 717,412 775.3,412 775.3,428 717,428"/>
+<text class="nt" x="746.15" y="424" text-anchor="middle">I2S_BCK</text>
+<polyline class="w" points="690,460 710,460"/>
+<text class="pin" x="684" y="464" text-anchor="end">GPIO25</text>
+<polygon class="net" points="710,460 717,452 768.4,452 768.4,468 717,468"/>
+<text class="nt" x="742.7" y="464" text-anchor="middle">I2S_WS</text>
+<polyline class="w" points="690,500 710,500"/>
+<text class="pin" x="684" y="504" text-anchor="end">GPIO22</text>
+<polygon class="net" points="710,500 717,492 782.2,492 782.2,508 717,508"/>
+<text class="nt" x="749.6" y="504" text-anchor="middle">I2S_DATA</text>
+<text class="ref" x="600" y="560" text-anchor="middle">U4</text>
+<text class="rv" x="600" y="576" text-anchor="middle">ESP32 DevKit V1</text>
+<text class="rv" x="600" y="592" text-anchor="middle">entradas só no ADC1</text>
+<rect class="fr" x="810" y="40" width="370" height="670"/>
+<text class="ft" x="820" y="59" text-anchor="start">Áudio, monte só uma das saídas</text>
+<text class="sub" x="822" y="82" text-anchor="start">Opção B, caixinha pela P2</text>
+<rect class="box" x="900" y="95" width="140" height="195"/>
+<polyline class="w" points="880,112 900,112"/>
+<text class="pin" x="906" y="116" text-anchor="start">VIN</text>
+<polygon class="net" points="880,112 873,104 842.3,104 842.3,120 873,120"/>
+<text class="nt" x="857.65" y="116" text-anchor="middle">+5V</text>
+<polyline class="w" points="880,140 900,140"/>
+<text class="pin" x="906" y="144" text-anchor="start">GND</text>
+<polyline class="w" points="880,140 866,140 866,146"/>
+<path class="s" d="M866 146 v10 M854 156 h24 M859 160 h14 M863 164 h6"/>
+<polyline class="w" points="880,180 900,180"/>
+<text class="pin" x="906" y="184" text-anchor="start">BCK</text>
+<polygon class="net" points="880,180 873,172 814.7,172 814.7,188 873,188"/>
+<text class="nt" x="843.85" y="184" text-anchor="middle">I2S_BCK</text>
+<polyline class="w" points="880,210 900,210"/>
+<text class="pin" x="906" y="214" text-anchor="start">DIN</text>
+<polygon class="net" points="880,210 873,202 807.8,202 807.8,218 873,218"/>
+<text class="nt" x="840.4" y="214" text-anchor="middle">I2S_DATA</text>
+<polyline class="w" points="880,240 900,240"/>
+<text class="pin" x="906" y="244" text-anchor="start">LCK</text>
+<polygon class="net" points="880,240 873,232 821.6,232 821.6,248 873,248"/>
+<text class="nt" x="847.3" y="244" text-anchor="middle">I2S_WS</text>
+<polyline class="w" points="880,270 900,270"/>
+<text class="pin" x="906" y="274" text-anchor="start">SCK</text>
+<polyline class="w" points="880,270 866,270 866,272"/>
+<path class="s" d="M866 272 v10 M854 282 h24 M859 286 h14 M863 290 h6"/>
+<polyline class="w" points="1040,140 1060,140"/>
+<text class="pin" x="1034" y="144" text-anchor="end">OUT L</text>
+<polyline class="w" points="1060,140 1105,140"/>
+<polyline class="w" points="1040,175 1060,175"/>
+<text class="pin" x="1034" y="179" text-anchor="end">OUT R</text>
+<polyline class="w" points="1060,175 1105,175"/>
+<polyline class="w" points="1040,210 1060,210"/>
+<text class="pin" x="1034" y="214" text-anchor="end">AGND</text>
+<polyline class="w" points="1060,210 1105,210"/>
+<rect class="box" x="1105" y="125" width="40" height="100"/>
+<circle class="s" cx="1105" cy="140" r="3"/>
+<text class="pin" x="1132" y="144" text-anchor="middle">T</text>
+<circle class="s" cx="1105" cy="175" r="3"/>
+<text class="pin" x="1132" y="179" text-anchor="middle">R</text>
+<circle class="s" cx="1105" cy="210" r="3"/>
+<text class="pin" x="1132" y="214" text-anchor="middle">S</text>
+<text class="ref" x="1105" y="118" text-anchor="start">J3 P2</text>
+<text class="rv" x="1105" y="240" text-anchor="start">para a</text>
+<text class="rv" x="1105" y="253" text-anchor="start">caixinha</text>
+<text class="ref" x="990" y="244" text-anchor="middle">U2</text>
+<text class="rv" x="990" y="260" text-anchor="middle">PCM5102A</text>
+<text class="rv" x="990" y="274" text-anchor="middle">DAC I2S</text>
+<text class="rv" x="822" y="312" text-anchor="start">SCK no terra: PLL interno.</text>
+<text class="rv" x="822" y="326" text-anchor="start">XSMT alto, FMT baixo.</text>
+<text class="sub" x="822" y="372" text-anchor="start">Opção A, alto-falante direto</text>
+<rect class="box" x="900" y="390" width="140" height="225"/>
+<polyline class="w" points="880,410 900,410"/>
+<text class="pin" x="906" y="414" text-anchor="start">VIN</text>
+<polygon class="net" points="880,410 873,402 842.3,402 842.3,418 873,418"/>
+<text class="nt" x="857.65" y="414" text-anchor="middle">+5V</text>
+<polyline class="w" points="880,438 900,438"/>
+<text class="pin" x="906" y="442" text-anchor="start">GND</text>
+<polyline class="w" points="880,438 866,438 866,444"/>
+<path class="s" d="M866 444 v10 M854 454 h24 M859 458 h14 M863 462 h6"/>
+<polyline class="w" points="880,478 900,478"/>
+<text class="pin" x="906" y="482" text-anchor="start">BCLK</text>
+<polygon class="net" points="880,478 873,470 814.7,470 814.7,486 873,486"/>
+<text class="nt" x="843.85" y="482" text-anchor="middle">I2S_BCK</text>
+<polyline class="w" points="880,508 900,508"/>
+<text class="pin" x="906" y="512" text-anchor="start">LRC</text>
+<polygon class="net" points="880,508 873,500 821.6,500 821.6,516 873,516"/>
+<text class="nt" x="847.3" y="512" text-anchor="middle">I2S_WS</text>
+<polyline class="w" points="880,538 900,538"/>
+<text class="pin" x="906" y="542" text-anchor="start">DIN</text>
+<polygon class="net" points="880,538 873,530 807.8,530 807.8,546 873,546"/>
+<text class="nt" x="840.4" y="542" text-anchor="middle">I2S_DATA</text>
+<polyline class="w" points="880,568 900,568"/>
+<text class="pin" x="906" y="572" text-anchor="start">GAIN</text>
+<path class="s" d="M872 564 l8 8 M880 564 l-8 8"/>
+<polyline class="w" points="880,596 900,596"/>
+<text class="pin" x="906" y="600" text-anchor="start">SD</text>
+<path class="s" d="M872 592 l8 8 M880 592 l-8 8"/>
+<polyline class="w" points="1040,470 1060,470"/>
+<text class="pin" x="1034" y="474" text-anchor="end">SPK+</text>
+<polyline class="w" points="1040,540 1060,540"/>
+<text class="pin" x="1034" y="544" text-anchor="end">SPK−</text>
+<polyline class="w" points="1060,470 1080,470 1080,492 1110,492"/>
+<polyline class="w" points="1060,540 1080,540 1080,518 1110,518"/>
+<rect class="box" x="1110" y="484" width="14" height="42"/>
+<path class="s" d="M1124 484 L1146 466 L1146 544 L1124 526"/>
+<text class="ref" x="1110" y="562" text-anchor="start">LS1</text>
+<text class="rv" x="1110" y="576" text-anchor="start">4Ω, 3W</text>
+<text class="ref" x="990" y="572" text-anchor="middle">U3</text>
+<text class="rv" x="990" y="588" text-anchor="middle">MAX98357A</text>
+<text class="rv" x="990" y="602" text-anchor="middle">amp I2S 3W</text>
+<text class="rv" x="822" y="640" text-anchor="start">VIN no máximo 5,5V.</text>
+<text class="rv" x="822" y="654" text-anchor="start">Nunca no 12V.</text>
+<text class="rv" x="822" y="672" text-anchor="start">GAIN livre = 9 dB.</text>
+<rect class="border" x="860" y="724" width="320" height="76"/>
+<line class="s" x1="860" y1="756" x2="1180" y2="756"/>
+<line class="s" x1="860" y1="778" x2="1180" y2="778"/>
+<text class="tb" x="870" y="745" text-anchor="start">Módulo de som de motor, scooter elétrica</text>
+<text class="rv" x="870" y="772" text-anchor="start">ESP32 + I2S</text>
+<text class="rv" x="1170" y="772" text-anchor="end">Folha 1 de 1</text>
+<text class="rv" x="870" y="794" text-anchor="start">Rev A</text>
+<text class="rv" x="1170" y="794" text-anchor="end">2026-09-24</text>
+</svg>
+</div>
+
+<div class="text">
+<h2>Três correções em relação ao diagrama anterior</h2>
+<p class="fix"><b>O MAX98357A não vai no 12V.</b> O limite dele é 5,5V. O diagrama de blocos mandava 12V e isso queimaria o chip na primeira ligada. Aqui ele está no 5V, e o buck de 12V saiu do projeto. Ele só volta se você trocar por um amplificador maior, como um TPA3116, alimentado pela saída de linha do PCM5102A.</p>
+<p class="fix"><b>O hall do motor não usa mais divisor.</b> O sensor é de coletor aberto, e o nível alto vem de um pull-up dentro da controladora. Um divisor por cima desse pull-up deixa o nível alto perto do limiar do ESP32, na faixa de 2,5V, e você perde pulsos sem entender por quê. O diodo D1 só deixa o hall puxar para baixo; o nível alto vem do R3, no 3,3V do próprio ESP32. Nunca passa do limite e a controladora não enxerga carga nenhuma.</p>
+<p class="fix"><b>O 10k extra em série no punho era redundante.</b> O R1, que é a parte de cima do divisor, já limita a corrente em caso de curto. Somar outro 10k só derrubaria a leitura para 2,2V e jogaria fora resolução.</p>
+
+<h2>Lista de materiais</h2>
+<div class="tbl"><table>
+<tr><th>Ref</th><th>Peça</th><th>Por quê</th></tr>
+<tr><td class="r">U1</td><td>Buck XL7015, entrada 5 a 80V</td><td>O LM2596 comum aguenta 40V. Pack de 36V carregado bate 42V; de 48V, 54,6V.</td></tr>
+<tr><td class="r">U2</td><td>Módulo PCM5102A</td><td>Opção B. Nível de linha para a entrada P2. Normalmente já vem com o jack.</td></tr>
+<tr><td class="r">U3</td><td>Módulo MAX98357A</td><td>Opção A. Amplificador direto no alto-falante.</td></tr>
+<tr><td class="r">U4</td><td>ESP32 DevKit V1, 30 pinos</td><td></td></tr>
+<tr><td class="r">F1</td><td>Fusível 1A com porta-fusível em linha</td><td>Tudo consome menos de 500mA.</td></tr>
+<tr><td class="r">SW1</td><td>Chave com especificação DC acima da tensão do pack</td><td>Chave marcada 250V AC muitas vezes aguenta só 30V DC. Arco em DC não se apaga sozinho.</td></tr>
+<tr><td class="r">C1</td><td>Eletrolítico 470µF, 100V</td><td>Segura o chaveamento da controladora antes do buck.</td></tr>
+<tr><td class="r">C2</td><td>Cerâmico 100nF, 100V</td><td>Ruído de alta frequência que o eletrolítico não pega.</td></tr>
+<tr><td class="r">C3</td><td>Cerâmico 100nF</td><td>Com R1 e R2 forma passa-baixa em uns 230 Hz. Corta o tremor do punho sem atrasar a leitura.</td></tr>
+<tr><td class="r">R1, R3</td><td>10k, 1/4W</td><td></td></tr>
+<tr><td class="r">R2</td><td>22k, 1/4W</td><td>4,2V no punho vira 2,9V no ADC.</td></tr>
+<tr><td class="r">D1</td><td>Schottky BAT85 ou 1N5817</td><td>Precisa ser Schottky. Diodo comum de silício cai 0,7V e o nível baixo fica ambíguo.</td></tr>
+<tr><td class="r">LS1</td><td>Alto-falante 4Ω, 3W ou mais</td><td>Só na opção A.</td></tr>
+</table></div>
+
+<h2>Antes de energizar</h2>
+<p>Ligue o buck sozinho, sem nada na saída, e gire o trimpot até o multímetro marcar 5,0V. Esses módulos saem de fábrica em tensão aleatória, e já vi chegar com 20V na saída.</p>
+<p>Meça a tensão do fio de sinal do punho em repouso e no fundo, com a scooter ligada. Se o fundo não passar de 3,3V, sua controladora trabalha em 3,3V, e aí você tira o R2 e liga o sinal pelo R1 direto no GPIO34.</p>
+<p>Encontre o fio certo do hall medindo com a roda girando devagar na mão: o fio de sinal alterna entre perto de zero e perto de 5V. Qualquer um dos três serve.</p>
+<p>GPIO34 e GPIO35 não têm pull-up interno. Por isso o R3 é externo e não pode faltar.</p>
+</div>
+</div>
+<script>
+(function(){
+  var b=document.getElementById("fit"), s=document.getElementById("sheet"), h=document.getElementById("hint");
+  b.addEventListener("click",function(){
+    var on=s.classList.toggle("fit");
+    b.setAttribute("aria-pressed",String(on));
+    b.textContent=on?"Tamanho real":"Ajustar à tela";
+    h.textContent=on?"Visão geral. Use pinça para ler os detalhes.":"Arraste para os lados, ou use pinça para ampliar.";
+  });
+})();
+</script>
+</body>
+</html>
