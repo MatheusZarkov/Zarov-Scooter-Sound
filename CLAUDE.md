@@ -23,6 +23,13 @@ de mudar.
   embutidos em base64 no simulador. Candidatos diretos para o firmware.
 - `ferramentas/extrair_camadas.py`: rastreia o rpm pela frequência de explosão e
   corta os loops em giro constante com número inteiro de ciclos.
+- `amostras/hayabusa-graos/` e `ferramentas/extrair_graos.py`: "Hayabusa granular".
+  752 grãos de um ciclo do motor (2 voltas), tirados da mesma gravação a cada 3% de
+  giro, alinhados em fase; 1,5 MB em 32 kHz. A cada ciclo toca um grão gravado a
+  menos de 2% do giro atual: continua no grão seguinte da gravação quando dá, senão
+  sorteia. Medido contra a gravação: timbre a 3,1 dB na subida e 2,8 na descida
+  (piso natural 3,0 a 3,3; camadas 4,0) e ritmo das explosões igual ao original.
+  Sem loop se repetindo. É o melhor candidato para o firmware.
 - `ferramentas/motor-fisico/`: "Hayabusa física" do simulador. Usa o código do
   engine-sim (MIT) para gás, combustão, válvulas e sintetizador, com o virabrequim
   imposto pelo rpm do banco (sem resolvedor de corpo rígido). Como gerar o pacote
