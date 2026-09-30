@@ -29,7 +29,21 @@ de mudar.
   menos de 2% do giro atual: continua no grão seguinte da gravação quando dá, senão
   sorteia. Medido contra a gravação: timbre a 3,1 dB na subida e 2,8 na descida
   (piso natural 3,0 a 3,3; camadas 4,0) e ritmo das explosões igual ao original.
-  Sem loop se repetindo. É o melhor candidato para o firmware.
+  Sem loop se repetindo. É o melhor candidato para o firmware, e a preferida do
+  usuário: não mexer no som dela sem pedido.
+- `gravacoes/hayabusa_marchas.wav`, `gravacoes/hayabusa_corte.wav`,
+  `amostras/hayabusa-graos-marchas/` e `ferramentas/extrair_graos_marchas.py`:
+  grãos da granular com marchas (1ª a 3ª acelerando, desaceleração em 3ª e 2ª,
+  lenta a 1400 rpm) e do corte de giro (2,5 s tocados em sequência). O usuário
+  troca marcha perto de 4950 rpm e o giro cai para uns 4050. Onde a gravação com
+  marcha não cobre, os grãos apontam para a sem marcha (fonte 1). Contra a gravação:
+  cada trecho no piso natural; os grãos sem marcha ficariam a 6 dB, porque a moto
+  engatada soa diferente dela acelerando solta. O rpm dessas gravações foi rastreado
+  por trecho, pelo espaçamento das harmônicas (meia ordem = rpm/120).
+- Exceção à regra central, só na granular com marchas ligadas: andando, o motor
+  gira preso à roda e a embreagem patina a 2500 rpm até a roda alcançar
+  (`rpm = max(roda, min(punho, 2500))`); parado, o punho gira livre. Com
+  `max(roda, punho)` o punho cravava 11300 rpm e as trocas não se ouviam.
 - `ferramentas/motor-fisico/`: "Hayabusa física" do simulador. Usa o código do
   engine-sim (MIT) para gás, combustão, válvulas e sintetizador, com o virabrequim
   imposto pelo rpm do banco (sem resolvedor de corpo rígido). Como gerar o pacote
