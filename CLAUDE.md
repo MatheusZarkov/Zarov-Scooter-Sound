@@ -44,6 +44,14 @@ de mudar.
   gira preso à roda e a embreagem patina a 2500 rpm até a roda alcançar
   (`rpm = max(roda, min(punho, 2500))`); parado, o punho gira livre. Com
   `max(roda, punho)` o punho cravava 11300 rpm e as trocas não se ouviam.
+- `amostras/harley-granular/`: "Harley granular", feita em outra sessão e adaptada
+  ao banco. Gravações mono 48 kHz (marcha lenta 9 s, aceleração 35,6 s) e marcadores
+  de início de cada ciclo de 720° (`markers.json`: lenta 902 a 969 rpm, subida 1080
+  a 6316, descida 2551 a 6170). Cada grão é um ciclo inteiro, sobreposto no período
+  do giro atual com janela seno/cosseno (tipo PSOLA), o que preserva o pulso
+  irregular do V-twin. O algoritmo original está em `engine-worklet-original.js`;
+  no banco ele foi portado sem mudança de síntese, só com giro e carga vindos do
+  banco. 4,3 MB de amostras, 4% do tempo real num núcleo x86.
 - `ferramentas/motor-fisico/`: "Hayabusa física" do simulador. Usa o código do
   engine-sim (MIT) para gás, combustão, válvulas e sintetizador, com o virabrequim
   imposto pelo rpm do banco (sem resolvedor de corpo rígido). Como gerar o pacote

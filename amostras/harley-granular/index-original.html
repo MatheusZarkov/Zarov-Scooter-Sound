@@ -1,0 +1,284 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Harley Granular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: an instrument cluster. Tach on the left, controls on the right, stacking on phones. */
+:root {
+  --bg: #e8e9e7;
+  --panel: #f5f5f3;
+  --ink: #17191b;
+  --muted: #5d625f;
+  --line: #c9ccc8;
+  --accent: #a65a00;
+  --accent-soft: #e9c894;
+  --red: #b3261e;
+  --dial: #fbfbf9;
+  --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121312; --panel: #1b1c1b; --ink: #ecebe6; --muted: #9a9d98; --line: #2f322f;
+    --accent: #f0a23a; --accent-soft: #5a3c12; --red: #ff5a4f; --dial: #0c0d0c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121312; --panel: #1b1c1b; --ink: #ecebe6; --muted: #9a9d98; --line: #2f322f;
+  --accent: #f0a23a; --accent-soft: #5a3c12; --red: #ff5a4f; --dial: #0c0d0c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); padding: 24px 16px 40px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+h1 { font: 800 clamp(34px, 6vw, 52px)/0.95 var(--f-display); letter-spacing: 0.01em; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.spec { font: 13px var(--f-mono); color: var(--muted); }
+.cluster { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .cluster { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 20px; min-width: 0; }
+.tach { display: grid; gap: 12px; justify-items: center; }
+canvas { width: 100%; max-width: 460px; aspect-ratio: 1 / 1; display: block; }
+.readout { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.readout b { color: var(--ink); font-weight: 500; }
+.controls { display: grid; gap: 18px; align-content: start; }
+.label { font: 600 11px var(--f-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+button { font: inherit; cursor: pointer; }
+#start { font: 800 22px var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 14px; border-radius: 6px; border: 2px solid var(--ink); background: var(--ink); color: var(--panel); }
+#start[data-on="true"] { background: transparent; color: var(--ink); }
+#start:disabled { opacity: 0.5; cursor: wait; }
+#grip { user-select: none; -webkit-user-select: none; touch-action: none; padding: 26px 14px; border-radius: 6px; border: 2px dashed var(--accent); background: transparent; color: var(--accent); font: 800 20px var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; }
+#grip.held { background: var(--accent); color: var(--panel); border-style: solid; }
+#grip small { display: block; font: 400 12px var(--f-body); letter-spacing: 0; text-transform: none; opacity: 0.85; margin-top: 4px; }
+.field { display: grid; gap: 6px; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.val { font: 500 13px var(--f-mono); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.toggle { display: flex; align-items: center; gap: 10px; }
+.toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.banks { display: grid; gap: 10px; }
+.bank { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; font-size: 13px; }
+.bank .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bank .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.bank .val { text-align: right; }
+.bank span:first-child small { display: block; color: var(--muted); font: 11px var(--f-mono); }
+.notes { color: var(--muted); font-size: 14px; max-width: 70ch; display: grid; gap: 6px; }
+.notes p { margin: 0; }
+kbd { font: 12px var(--f-mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); color: var(--ink); }
+#status { font: 13px var(--f-mono); color: var(--muted); min-height: 1.5em; }
+#status.err { color: var(--red); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Harley Granular</h1>
+    <span class="spec">V-twin 52° · moente único · ciclos de 720°</span>
+  </header>
+
+  <div class="cluster">
+    <section class="panel tach" aria-label="Conta-giros">
+      <canvas id="dial" width="920" height="920"></canvas>
+      <div class="readout">
+        <span>ciclo <b id="cycms">128.0</b> ms</span>
+        <span>disparo <b id="hz">7.8</b> Hz</span>
+        <span>carga <b id="load">0</b>%</span>
+      </div>
+    </section>
+
+    <section class="panel controls" aria-label="Controles">
+      <button id="start" disabled>Carregando…</button>
+      <div id="status" role="status">Baixando os samples</div>
+
+      <button id="grip" aria-label="Segure para acelerar">Segure para acelerar<small>ou segure <kbd>Espaço</kbd> / <kbd>W</kbd></small></button>
+
+      <div class="field">
+        <div class="row"><label class="label" for="open">Abertura ao segurar</label><span class="val" id="openV">100%</span></div>
+        <input id="open" type="range" min="5" max="100" value="100">
+      </div>
+
+      <label class="toggle"><input id="direct" type="checkbox"> <span>Controle direto de rpm</span></label>
+      <div class="field" id="directField" hidden>
+        <div class="row"><label class="label" for="rpmSet">Rotação alvo</label><span class="val" id="rpmSetV">935 rpm</span></div>
+        <input id="rpmSet" type="range" min="900" max="6200" step="10" value="935">
+      </div>
+
+      <div class="field">
+        <div class="row"><label class="label" for="resp">Resposta do motor</label><span class="val" id="respV">1.0×</span></div>
+        <input id="resp" type="range" min="0.3" max="3" step="0.1" value="1">
+      </div>
+
+      <div class="field">
+        <div class="row"><label class="label" for="vol">Volume</label><span class="val" id="volV">80%</span></div>
+        <input id="vol" type="range" min="0" max="150" value="80">
+      </div>
+
+      <div class="banks" aria-label="Mistura de bancos">
+        <span class="label">Tocando agora</span>
+        <div class="bank"><span>Idle<small id="rIdle">—</small></span><span class="bar"><i id="bIdle"></i></span><span class="val" id="vIdle">0%</span></div>
+        <div class="bank"><span>Subida<small id="rAccel">—</small></span><span class="bar"><i id="bAccel"></i></span><span class="val" id="vAccel">0%</span></div>
+        <div class="bank"><span>Descida<small id="rDecel">—</small></span><span class="bar"><i id="bDecel"></i></span><span class="val" id="vDecel">0%</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <p>Cada grão é um ciclo inteiro do motor (duas voltas do virabrequim), recortado entre marcadores achados na gravação e encaixado no período da rotação atual. Os pulsos irregulares do V-twin ficam intactos, sem o efeito de flanger comum em granular de motor.</p>
+    <p>Acima de 1150 rpm, com o acelerador aberto, o som vem da subida gravada. Solto, vem da descida (desaceleração com o motor puxando). Perto dos 935 rpm entra a gravação de marcha lenta.</p>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const REDLINE = 5500, MAXRPM = 7000;
+let ctx, node, state = { rpm: 935, load: 0, w: { idle: 1, accel: 0, decel: 0 } }, running = false, ready = false;
+let held = false;
+
+async function load() {
+  try {
+    const [markers, idle, accel] = await Promise.all([
+      fetch('markers.json').then((r) => r.json()),
+      fetch('idle.wav').then((r) => r.arrayBuffer()),
+      fetch('accel.wav').then((r) => r.arrayBuffer()),
+    ]);
+    window._raw = { markers, idle, accel };
+    $('start').disabled = false;
+    $('start').textContent = 'Ligar motor';
+    $('status').textContent = 'Samples prontos. Clique em Ligar motor.';
+  } catch (e) {
+    $('status').textContent = 'Não consegui baixar os samples. Recarregue a página.';
+    $('status').className = 'err';
+  }
+}
+
+async function boot() {
+  ctx = new AudioContext({ latencyHint: 'playback' });
+  await ctx.audioWorklet.addModule('engine-worklet.js');
+  const { markers, idle, accel } = window._raw;
+  const [bi, ba] = await Promise.all([ctx.decodeAudioData(idle.slice(0)), ctx.decodeAudioData(accel.slice(0))]);
+  const di = bi.getChannelData(0).slice(), da = ba.getChannelData(0).slice();
+  node = new AudioWorkletNode(ctx, 'harley-granular', { outputChannelCount: [2] });
+  node.connect(ctx.destination);
+  node.port.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'state') state = m;
+    if (m.type === 'ready') {
+      const f = (r) => `${Math.round(r[0])}–${Math.round(r[1])} · ${r[2]} ciclos`;
+      $('rIdle').textContent = f(m.ranges.idle);
+      $('rAccel').textContent = f(m.ranges.accel);
+      $('rDecel').textContent = f(m.ranges.decel);
+      ready = true;
+    }
+  };
+  // accel and decel come from the same recording.
+  node.port.postMessage({ type: 'banks', banks: [
+    { name: 'idle', data: di, markers: markers.idle },
+    { name: 'accel', data: da, markers: markers.accel },
+    { name: 'decel', data: da, markers: markers.decel },
+  ] });
+  pushSettings();
+}
+
+function set(values) { if (node) node.port.postMessage({ type: 'set', values }); }
+function pushSettings() {
+  set({
+    volume: $('vol').value / 100,
+    upRate: +$('resp').value,
+    direct: $('direct').checked,
+    directRpm: +$('rpmSet').value,
+    throttle: held ? $('open').value / 100 : 0,
+  });
+}
+
+$('start').addEventListener('click', async () => {
+  $('start').disabled = true;
+  try {
+    if (!ctx) { $('status').textContent = 'Preparando o motor…'; await boot(); }
+    running = !running;
+    if (running) await ctx.resume();
+    set({ running });
+    $('start').dataset.on = running;
+    $('start').textContent = running ? 'Desligar' : 'Ligar motor';
+    $('status').textContent = running ? `Rodando a ${ctx.sampleRate} Hz` : 'Motor desligado';
+  } catch (e) {
+    $('status').textContent = 'O navegador recusou o áudio: ' + e.message;
+    $('status').className = 'err';
+  }
+  $('start').disabled = false;
+});
+
+function hold(on) {
+  if (held === on) return;
+  held = on;
+  $('grip').classList.toggle('held', on);
+  pushSettings();
+}
+const grip = $('grip');
+grip.addEventListener('pointerdown', (e) => { grip.setPointerCapture(e.pointerId); hold(true); });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => grip.addEventListener(ev, () => hold(false)));
+grip.addEventListener('keydown', (e) => { if (e.key === 'Enter') hold(true); });
+grip.addEventListener('keyup', (e) => { if (e.key === 'Enter') hold(false); });
+window.addEventListener('keydown', (e) => {
+  if ((e.code === 'Space' || e.code === 'KeyW') && !e.repeat && !(e.target instanceof HTMLInputElement && e.target.type !== 'range' && e.target.type !== 'checkbox')) {
+    e.preventDefault(); hold(true);
+  }
+});
+window.addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'KeyW') { e.preventDefault(); hold(false); } });
+window.addEventListener('blur', () => hold(false));
+
+$('open').addEventListener('input', () => { $('openV').textContent = $('open').value + '%'; pushSettings(); });
+$('resp').addEventListener('input', () => { $('respV').textContent = (+$('resp').value).toFixed(1) + '×'; pushSettings(); });
+$('vol').addEventListener('input', () => { $('volV').textContent = $('vol').value + '%'; pushSettings(); });
+$('rpmSet').addEventListener('input', () => { $('rpmSetV').textContent = $('rpmSet').value + ' rpm'; pushSettings(); });
+$('direct').addEventListener('change', () => { $('directField').hidden = !$('direct').checked; pushSettings(); });
+
+// Tachometer
+const cv = $('dial'), g = cv.getContext('2d');
+let shown = 935;
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function draw() {
+  shown += (state.rpm - shown) * 0.35;
+  const W = cv.width, c = W / 2, R = W * 0.44;
+  const a0 = Math.PI * 0.75, span = Math.PI * 1.5;
+  const ang = (r) => a0 + span * Math.min(r, MAXRPM) / MAXRPM;
+  const ink = css('--ink'), muted = css('--muted'), acc = css('--accent'), red = css('--red'), line = css('--line');
+  g.clearRect(0, 0, W, W);
+  g.fillStyle = css('--dial'); g.beginPath(); g.arc(c, c, R + 18, 0, Math.PI * 2); g.fill();
+  g.lineWidth = 3; g.strokeStyle = line; g.stroke();
+  g.lineWidth = 22; g.strokeStyle = red; g.beginPath(); g.arc(c, c, R - 14, ang(REDLINE), ang(MAXRPM)); g.stroke();
+  for (let r = 0; r <= MAXRPM; r += 250) {
+    const a = ang(r), major = r % 1000 === 0;
+    const r1 = R - (major ? 50 : 30);
+    g.strokeStyle = r >= REDLINE ? red : ink; g.lineWidth = major ? 7 : 3;
+    g.beginPath(); g.moveTo(c + Math.cos(a) * r1, c + Math.sin(a) * r1); g.lineTo(c + Math.cos(a) * R, c + Math.sin(a) * R); g.stroke();
+    if (major) {
+      g.fillStyle = r >= REDLINE ? red : ink; g.font = `800 64px ${css('--f-display')}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(r / 1000, c + Math.cos(a) * (R - 100), c + Math.sin(a) * (R - 100));
+    }
+  }
+  g.fillStyle = muted; g.font = `500 26px ${css('--f-mono')}`; g.textAlign = 'center';
+  g.fillText('× 1000 r/min', c, c + R * 0.33);
+  g.fillStyle = ink; g.font = `800 150px ${css('--f-display')}`;
+  g.fillText(Math.round(shown / 10) * 10, c, c + R * 0.62);
+  const a = ang(shown);
+  g.strokeStyle = acc; g.lineWidth = 10; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(c - Math.cos(a) * 40, c - Math.sin(a) * 40); g.lineTo(c + Math.cos(a) * (R - 24), c + Math.sin(a) * (R - 24)); g.stroke();
+  g.fillStyle = ink; g.beginPath(); g.arc(c, c, 26, 0, Math.PI * 2); g.fill();
+
+  $('cycms').textContent = (120000 / shown).toFixed(1);
+  $('hz').textContent = (shown / 60).toFixed(1);
+  $('load').textContent = Math.round(state.load * 100);
+  for (const [k, id] of [['idle', 'Idle'], ['accel', 'Accel'], ['decel', 'Decel']]) {
+    const v = running ? state.w[k] : 0;
+    $('b' + id).style.width = (v * 100).toFixed(1) + '%';
+    $('v' + id).textContent = Math.round(v * 100) + '%';
+  }
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+load();
+</script>
+
+</body></html>
