@@ -31,8 +31,9 @@ const Perfil COM_MARCHA = {1400, 11300, 1115, {900, 738, 605, 496}, 4950, 3600, 
 // SS49E: tensao proporcional ao campo. Mediana de 5 leituras, calibracao entre
 // repouso e fundo, tabela de correcao (a curva do sensor nao e linear) e zona morta.
 struct Punho {
-  float repouso_mV = 0;      // gravar com o punho solto
-  float fundo_mV = 3300;     // gravar com o punho no fim do curso
+  // padroes nos limites do ADC do ESP32 (le de ~140 a ~3100 mV); gravar os de verdade com r e f
+  float repouso_mV = 150;    // gravar com o punho solto
+  float fundo_mV = 3100;     // gravar com o punho no fim do curso
   // posicao real do punho (0 a 1) para leituras normalizadas 0, 0.1, ..., 1.
   // Linear por padrao; preencher com a calibracao do sensor de verdade.
   float tabela[11] = {0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1};

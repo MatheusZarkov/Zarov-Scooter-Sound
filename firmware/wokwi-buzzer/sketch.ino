@@ -1,16 +1,21 @@
-// Teste da logica de controle no ESP32 (Wokwi ou placa de verdade). Arquivo unico:
-// a logica de controle.h esta embutida aqui, para o projeto no Wokwi ter so este
-// arquivo e o diagram.json.
-// Mostra no monitor serial o punho, a velocidade da roda e o rpm que o som tocaria.
+// Teste da logica de controle no ESP32 com som no buzzer do Wokwi. Arquivo unico:
+// a logica de controle.h esta embutida aqui, o projeto tem so este arquivo e o diagram.json.
+//
+// O buzzer so liga e desliga, entao nao toca as amostras da Hayabusa. Ele toca um trem de
+// pulsos estreitos na frequencia das explosoes (4 cilindros, 4 tempos: 2 por volta, rpm/30),
+// com variacao pequena de ciclo a ciclo, pulso mais largo com o punho aberto (som mais cheio),
+// estalos no estouro e cortes no limitador. Serve para ouvir a logica: o giro seguindo o
+// punho, a roda segurando o giro, as trocas de marcha.
 //
 // No Wokwi: o potenciometro deslizante faz o papel do SS49E no punho (GPIO34) e o
 // potenciometro redondo escolhe a velocidade de uma roda simulada, que gera os pulsos
 // do A3144 no GPIO27, ligado ao GPIO35 como se fosse o sensor de verdade.
 // Na placa de verdade: SIMULAR_RODA = false e o A3144 no GPIO35 com pull-up de 10k no 3V3.
 //
-// Comandos pelo monitor serial:
+// Comandos pelo monitor serial (clique nele antes de digitar):
 //   r  grava o punho solto (repouso)     f  grava o punho no fundo
 //   m  liga/desliga marchas              c  mostra a calibracao
+//   s  liga/desliga o som
 #include <math.h>
 #include <stdint.h>
 #include "esp_timer.h"
@@ -147,7 +152,9 @@ const int PINO_PUNHO = 34;     // SS49E (ADC1)
 const int PINO_RODA = 35;      // A3144, sem pull-up interno: o de 10k e externo
 const int PINO_SIM_RODA = 27;  // so no Wokwi: gera os pulsos da roda simulada
 const int PINO_SIM_VEL = 32;   // so no Wokwi: potenciometro da velocidade simulada
+const int PINO_BUZZER = 21;    // so no Wokwi: buzzer
 const float VEL_SIM_MAX_KMH = 45;
+const float TICK_S = 0.0001f;  // timer de 100 us: roda simulada e som
 
 Punho punho;
 Roda roda;
@@ -163,16 +170,74 @@ void IRAM_ATTR pulsoRoda() {
   ultimoPulso = t;
 }
 
-volatile float freqSimulada = 0;   // pulsos por segundo
-void tickRodaSimulada(void*) {
-  static float fase = 0;
-  float f = freqSimulada;
-  if (f < 0.2f) { digitalWrite(PINO_SIM_RODA, HIGH); return; }
-  fase += f * 0.0002f;              // chamado a cada 200 us
-  if (fase >= 1) fase -= 1;
-  digitalWrite(PINO_SIM_RODA, fase < 0.2f ? LOW : HIGH);   // o A3144 puxa para baixo com o ima
+// ---------------------------------------------------------------- som
+// Escrito pelo laco de 100 Hz, lido pelo timer
+volatile bool somLigado = true;
+volatile float somFreq = 1100 / 30.0f;   // explosoes por segundo
+volatile float somLargura = 0.1f;        // fracao do ciclo com o pino alto
+volatile float somVariacao = 0.05f;      // variacao de periodo de um ciclo para o outro
+volatile bool somMudo = false;           // corte do limitador
+volatile int somEstouro = 0;             // ticks restantes de estalos
+
+static uint32_t semente = 2463534242u;
+static inline uint32_t sortear() { semente ^= semente << 13; semente ^= semente >> 17; semente ^= semente << 5; return semente; }
+static inline float aleatorio() { return (sortear() >> 8) * (1.0f / 16777216.0f); }
+
+volatile float freqSimulada = 0;   // pulsos da roda por segundo
+
+void tick(void*) {
+  if (SIMULAR_RODA) {
+    static float fase = 0.5f;
+    float f = freqSimulada;
+    if (f < 0.2f) { fase = 0.5f; digitalWrite(PINO_SIM_RODA, HIGH); }   // parado: proximo ima so na volta
+    else {
+      fase += f * TICK_S;
+      if (fase >= 1) fase -= 1;
+      digitalWrite(PINO_SIM_RODA, fase < 0.2f ? LOW : HIGH);   // o A3144 puxa para baixo com o ima
+    }
+  }
+
+  if (!somLigado) { digitalWrite(PINO_BUZZER, LOW); return; }
+  static float fase = 0, freqCiclo = 0;
+  static int estalo = 0;
+  if (freqCiclo == 0) freqCiclo = somFreq;
+  fase += freqCiclo * TICK_S;
+  if (fase >= 1) {   // nova explosao: periodo levemente diferente, como num motor de verdade
+    fase -= 1;
+    freqCiclo = somFreq * (1 + (aleatorio() - 0.5f) * somVariacao);
+  }
+  bool nivel = !somMudo && fase < somLargura;
+
+  // estouro: rajadas curtas de ruido em momentos sorteados
+  if (somEstouro > 0) {
+    somEstouro = somEstouro - 1;
+    if (estalo > 0) { estalo--; nivel = sortear() & 1; }
+    else if (aleatorio() < 0.0025f) estalo = 30 + sortear() % 90;   // 3 a 12 ms
+  } else estalo = 0;
+
+  digitalWrite(PINO_BUZZER, nivel ? HIGH : LOW);
 }
 
+void atualizarSom(float p) {
+  const Perfil &P = motor.P;
+  float giro = limitar((motor.rpm - P.idle) / (P.max - P.idle), 0, 1);
+  float f = motor.rpm / 30;
+
+  // limitador: com o punho no fundo e o giro no teto, corta a cada 40 ms
+  static int passoCorte = 0;
+  bool corte = p > 0.9f && motor.rpm >= P.max - 30;
+  passoCorte = corte ? passoCorte + 1 : 0;
+  bool mudo = corte && (passoCorte / 4) % 2 == 1;
+  if (corte && !mudo) f *= 0.97f;
+
+  somFreq = f;
+  somLargura = 0.08f + 0.27f * p;           // punho aberto: pulso mais largo, som mais cheio
+  somVariacao = 0.08f - 0.06f * giro;       // lenta mais irregular
+  somMudo = mudo;
+  if (motor.estouro) somEstouro = 4000;     // 400 ms de estalos
+}
+
+// ---------------------------------------------------------------- leitura e serial
 float lerPunho() {
   float a[5];
   for (int i = 0; i < 5; i++) a[i] = analogReadMilliVolts(PINO_PUNHO);
@@ -188,17 +253,19 @@ void setup() {
   Serial.begin(115200);
   pinMode(PINO_RODA, INPUT);
   attachInterrupt(digitalPinToInterrupt(PINO_RODA), pulsoRoda, FALLING);
+  pinMode(PINO_BUZZER, OUTPUT);
+  digitalWrite(PINO_BUZZER, LOW);
   if (SIMULAR_RODA) {
     pinMode(PINO_SIM_RODA, OUTPUT);
     digitalWrite(PINO_SIM_RODA, HIGH);
-    esp_timer_create_args_t args = {};
-    args.callback = tickRodaSimulada;
-    args.name = "roda_sim";
-    esp_timer_handle_t timer;
-    esp_timer_create(&args, &timer);
-    esp_timer_start_periodic(timer, 200);
   }
-  Serial.println("\nTeste de controle do som. Comandos: r repouso, f fundo, m marchas, c calibracao");
+  esp_timer_create_args_t args = {};
+  args.callback = tick;
+  args.name = "tick";
+  esp_timer_handle_t timer;
+  esp_timer_create(&args, &timer);
+  esp_timer_start_periodic(timer, 100);
+  Serial.println("\nTeste de controle do som. Comandos: r repouso, f fundo, m marchas, c calibracao, s som");
   mostrarCalibracao();
 }
 
@@ -209,6 +276,7 @@ void loop() {
     if (c == 'f') { lerPunho(); punho.fundo_mV = punho.ultimo_mV; mostrarCalibracao(); }
     if (c == 'm') { motor.escolherMarchas(!motor.marchas); Serial.printf("marchas %s\n", motor.marchas ? "ligadas" : "desligadas"); }
     if (c == 'c') mostrarCalibracao();
+    if (c == 's') { somLigado = !somLigado; Serial.printf("som %s\n", somLigado ? "ligado" : "desligado"); }
   }
 
   // laco de fisica em passo fixo de 100 Hz
@@ -230,6 +298,7 @@ void loop() {
   float v = roda.velocidade(periodo, idade);
 
   motor.passo(0.01f, p, v);
+  atualizarSom(p);
   if (motor.estouro) Serial.println(">>> ESTOURO no escapamento");
 
   if (++passos % 20 == 0) {   // 5 linhas por segundo
