@@ -4,7 +4,7 @@
 // No Wokwi: o potenciometro deslizante faz o papel do SS49E no punho (GPIO34) e o
 // potenciometro redondo escolhe a velocidade de uma roda simulada, que gera os pulsos
 // do A3144 no GPIO27, ligado ao GPIO35 como se fosse o sensor de verdade.
-// Na placa de verdade: SIMULAR_RODA 0 e o A3144 no GPIO35 com pull-up de 10k no 3V3.
+// Na placa de verdade: SIMULAR_RODA = false e o A3144 no GPIO35 com pull-up de 10k no 3V3.
 //
 // Comandos pelo monitor serial:
 //   r  grava o punho solto (repouso)     f  grava o punho no fundo
@@ -12,7 +12,8 @@
 #include "controle.h"
 #include "esp_timer.h"
 
-#define SIMULAR_RODA 1
+// true no Wokwi; false na placa de verdade, com o A3144 no GPIO35
+const bool SIMULAR_RODA = true;
 
 const int PINO_PUNHO = 34;     // SS49E (ADC1)
 const int PINO_RODA = 35;      // A3144, sem pull-up interno: o de 10k e externo
@@ -37,7 +38,6 @@ void IRAM_ATTR pulsoRoda() {
   portEXIT_CRITICAL_ISR(&trava);
 }
 
-#if SIMULAR_RODA
 volatile float freqSimulada = 0;   // pulsos por segundo
 void tickRodaSimulada(void*) {
   static float fase = 0;
@@ -47,7 +47,6 @@ void tickRodaSimulada(void*) {
   if (fase >= 1) fase -= 1;
   digitalWrite(PINO_SIM_RODA, fase < 0.2f ? LOW : HIGH);   // o A3144 puxa para baixo com o ima
 }
-#endif
 
 float lerPunho() {
   float a[5];
@@ -64,16 +63,16 @@ void setup() {
   Serial.begin(115200);
   pinMode(PINO_RODA, INPUT);
   attachInterrupt(digitalPinToInterrupt(PINO_RODA), pulsoRoda, FALLING);
-#if SIMULAR_RODA
-  pinMode(PINO_SIM_RODA, OUTPUT);
-  digitalWrite(PINO_SIM_RODA, HIGH);
-  esp_timer_create_args_t args = {};
-  args.callback = tickRodaSimulada;
-  args.name = "roda_sim";
-  esp_timer_handle_t timer;
-  esp_timer_create(&args, &timer);
-  esp_timer_start_periodic(timer, 200);
-#endif
+  if (SIMULAR_RODA) {
+    pinMode(PINO_SIM_RODA, OUTPUT);
+    digitalWrite(PINO_SIM_RODA, HIGH);
+    esp_timer_create_args_t args = {};
+    args.callback = tickRodaSimulada;
+    args.name = "roda_sim";
+    esp_timer_handle_t timer;
+    esp_timer_create(&args, &timer);
+    esp_timer_start_periodic(timer, 200);
+  }
   Serial.println("\nTeste de controle do som. Comandos: r repouso, f fundo, m marchas, c calibracao");
   mostrarCalibracao();
 }
@@ -93,10 +92,10 @@ void loop() {
   if ((int32_t)(agora - proximo) < 0) return;
   proximo = ((int32_t)(agora - proximo) > 50000) ? agora + 10000 : proximo + 10000;
 
-#if SIMULAR_RODA
-  float kmhSim = analogRead(PINO_SIM_VEL) / 4095.0f * VEL_SIM_MAX_KMH;
-  freqSimulada = kmhSim / 3.6f / roda.circunferencia_m * roda.imas;
-#endif
+  if (SIMULAR_RODA) {
+    float kmhSim = analogRead(PINO_SIM_VEL) / 4095.0f * VEL_SIM_MAX_KMH;
+    freqSimulada = kmhSim / 3.6f / roda.circunferencia_m * roda.imas;
+  }
 
   float p = lerPunho();
   portENTER_CRITICAL(&trava);
