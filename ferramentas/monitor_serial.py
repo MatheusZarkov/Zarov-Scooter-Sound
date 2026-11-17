@@ -19,7 +19,7 @@ bruto = "--bruto" in sys.argv
 
 MEDIDA = re.compile(r"punho\s+(\d+)%\s+\(\s*(\d+) mV\).*RPM\s+(\d+)\s+\((\w+)\)")
 RPM_MAX = 11300
-LARG = 20   # linha inteira com menos de 80 colunas, senao o painel quebra e o \r embaralha
+LARG = 16   # linha inteira com menos de 80 colunas, senao o painel quebra e o \r embaralha
 
 
 def barra(frac):
@@ -64,7 +64,7 @@ try:
                     continue
                 punho, mv, rpm, fonte = int(m[1]), int(m[2]), int(m[3]), m[4]
                 sys.stdout.write(
-                    f"\rpunho [{barra(punho / 100)}] {punho:3d}%  "
+                    f"\rpunho [{barra(punho / 100)}] {punho:3d}% {mv:4d}mV  "
                     f"motor [{barra(rpm / RPM_MAX)}] {rpm:5d} rpm {fonte:5s}"
                 )
                 sys.stdout.flush()
